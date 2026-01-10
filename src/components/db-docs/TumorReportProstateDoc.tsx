@@ -1,0 +1,152 @@
+export default function TumorReportProstateDoc() {
+  return (
+    <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
+      <h2 className="text-3xl font-bold mb-6">
+        🧬 Tumor Report Prostate Table
+      </h2>
+
+      <table className="min-w-full text-sm text-left border border-gray-300 rounded-lg overflow-hidden">
+        <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
+          <tr>
+            <th className="p-3">Field</th>
+            <th className="p-3">Type</th>
+            <th className="p-3">Description (EN / DE)</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          <TableRow
+            field="tumor_report_id"
+            type="Integer (PK, FK)"
+            description="Reference to tumor report / Verweis auf Tumorbericht"
+          />
+
+          <TableRow
+            field="gleason_primary_grade"
+            type="Enum"
+            description="Primary Gleason grade / Gleason-Grad (primär)"
+            enumValues={[
+              ["1", "Grade 1"],
+              ["2", "Grade 2"],
+              ["3", "Grade 3"],
+              ["4", "Grade 4"],
+              ["5", "Grade 5"],
+            ]}
+          />
+
+          <TableRow
+            field="gleason_secondary_grade"
+            type="Enum"
+            description="Secondary Gleason grade / Gleason-Grad (sekundär)"
+            enumValues={[
+              ["1", "Grade 1"],
+              ["2", "Grade 2"],
+              ["3", "Grade 3"],
+              ["4", "Grade 4"],
+              ["5", "Grade 5"],
+            ]}
+          />
+
+          <TableRow
+            field="gleason_score_result"
+            type="Enum"
+            description="Gleason score result / Gleason-Score-Ergebnis"
+            enumValues={[
+              ["2", "Score 2"],
+              ["3", "Score 3"],
+              ["4", "Score 4"],
+              ["5", "Score 5"],
+              ["6", "Score 6"],
+              ["7", "Score 7 (unspecified)"],
+              ["7a", "Score 7a (3+4)"],
+              ["7b", "Score 7b (4+3)"],
+              ["8", "Score 8"],
+              ["9", "Score 9"],
+              ["10", "Score 10"],
+            ]}
+          />
+
+          <TableRow
+            field="gleason_score_reason"
+            type="Enum"
+            description="Reason for Gleason score / Anlass für Gleason-Score"
+            enumValues={[
+              ["1", "Biopsy / Biopsie"],
+              ["2", "Surgery / Operation"],
+              ["3", "Autopsy / Autopsie"],
+              ["9", "Unknown / Unbekannt"],
+            ]}
+          />
+
+          <TableRow
+            field="psa"
+            type="Numeric (10,3)"
+            description="PSA value / PSA-Wert"
+          />
+
+          <TableRow
+            field="psa_date"
+            type="Date"
+            description="PSA test date / PSA-Datum"
+          />
+
+          <TableRow
+            field="psa_date_accuracy"
+            type="Enum"
+            description="Date accuracy (PSA) / Datumsgenauigkeit (PSA)"
+            enumValues={[
+              ["E", "Exact / Exakt"],
+              ["T", "Day / Tag"],
+              ["M", "Month / Monat"],
+              ["V", "Estimate / Vollschätzung"],
+            ]}
+          />
+
+          <TableRow
+            field="created_at"
+            type="Timestamp"
+            description="Created at / Erstellt am"
+          />
+          <TableRow
+            field="updated_at"
+            type="Timestamp"
+            description="Last updated / Zuletzt aktualisiert"
+          />
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function TableRow({
+  field,
+  type,
+  description,
+  enumValues = [],
+}: {
+  field: string;
+  type: string;
+  description: string;
+  enumValues?: [string, string][];
+}) {
+  return (
+    <tr className="hover:bg-gray-50">
+      <td className="p-3 font-mono text-blue-900">{field}</td>
+      <td className="p-3 text-gray-700">{type}</td>
+      <td className="p-3 text-gray-800">
+        <div>{description}</div>
+        {enumValues.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {enumValues.map(([val, label]) => (
+              <span
+                key={val}
+                className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs text-blue-800 font-medium"
+              >
+                {val}: {label}
+              </span>
+            ))}
+          </div>
+        )}
+      </td>
+    </tr>
+  );
+}
