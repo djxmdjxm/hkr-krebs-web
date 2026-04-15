@@ -6,7 +6,7 @@ export default function UploadSection() {
   const [dragging, setDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [type, setType] = useState("XML:oBDS_3.0.0.8a_RKI");
+  const [type, setType] = useState("XML:oBDS_3.0.4_RKI");
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,31 +27,31 @@ export default function UploadSection() {
 
     setUploading(true);
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
+    // Use FormData (multipart/form-data) instead of base64 JSON.
+    // Base64 encoding inflates file size by ~33% and causes Gunicorn timeouts
+    // for large files (Hamburg delivers >100 MB per quarter).
+    const formData = new FormData();
+    formData.append("type", type);
+    formData.append("file", selectedFile);
 
-      try {
-        const response = await fetch("/api/report", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type, file: base64 }),
-        });
+    try {
+      const response = await fetch("/api/report", {
+        method: "POST",
+        body: formData,  // no Content-Type header — browser sets multipart boundary automatically
+      });
 
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
-
-        alert("File uploaded successfully!");
-        setSelectedFile(null);
-      } catch (err) {
-        alert("Error uploading file.");
-        console.error(err);
-      } finally {
-        setUploading(false);
+      if (!response.ok) {
+        throw new Error("Upload failed");
       }
-    };
-    reader.readAsDataURL(selectedFile);
+
+      alert("File uploaded successfully!");
+      setSelectedFile(null);
+    } catch (err) {
+      alert("Error uploading file.");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
