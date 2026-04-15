@@ -1,42 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PageHeader from "@/components/PageHeader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Krebs DB",
-  description:
-    "Krebs Database: A collection of clinical oncology data from Germany.",
+  title: "KIKA — Hamburgisches Krebsregister",
+  description: "Import-System fuer oBDS_RKI-konforme XML-Dateien.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body
-        className={`flex flex-col ${geistSans.variable} ${geistMono.variable} antialiased font-sans min-h-screen bg-gray-50`}
-      >
+    <html lang="de">
+      <body className="flex flex-col min-h-screen" style={{ backgroundColor: "#F2F5F7" }}>
         <PageHeader />
-
-        <main className="flex flex-col grow min-h-full bg-gray-50">
-          {children}
-        </main>
-
-        <footer className="flex flex-col bg-gray-50 text-center py-6">
-          © KIKA 2025
+        <main className="flex flex-col grow">{children}</main>
+        <footer className="text-center py-6 text-sm" style={{ color: "#505050" }}>
+          &copy; KIKA 2025 &mdash; Hamburgisches Krebsregister
         </footer>
       </body>
     </html>

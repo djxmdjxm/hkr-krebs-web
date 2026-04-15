@@ -1,12 +1,22 @@
 "use client";
 
-import { useState, DragEvent, ChangeEvent, FormEvent } from "react";
+import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import ProcessStepper from "./ProcessStepper";
+import RoseProgress from "./RoseProgress";
+
+type UploadState = "idle" | "uploading" | "done" | "error";
 
 export default function UploadSection() {
   const [dragging, setDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [type, setType] = useState("XML:oBDS_3.0.4_RKI");
+  const [schemaType, setSchemaType] = useState("XML:oBDS_3.0.4_RKI");
+  const [uploadState, setUploadState] = useState<UploadState>("idle");
+  const [progress, setProgress] = useState(0);
+  const [uploadedMB, setUploadedMB] = useState(0);
+  const [totalMB, setTotalMB] = useState(0);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -16,114 +26,202 @@ export default function UploadSection() {
   const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     setDragging(false);
-
     const file = e.dataTransfer.files?.[0];
     if (file) setSelectedFile(file);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedFile) return alert("Please select a file.");
+  const handleSubmit = () => {
+    if (!selectedFile) return;
 
-    setUploading(true);
+    setUploadState("uploading");
+    setProgress(0);
+    setErrorMsg(null);
+    setTotalMB(selectedFile.size / 1_048_576);
 
-    // Use FormData (multipart/form-data) instead of base64 JSON.
-    // Base64 encoding inflates file size by ~33% and causes Gunicorn timeouts
-    // for large files (Hamburg delivers >100 MB per quarter).
     const formData = new FormData();
-    formData.append("type", type);
+    formData.append("type", schemaType);
     formData.append("file", selectedFile);
 
-    try {
-      const response = await fetch("/api/report", {
-        method: "POST",
-        body: formData,  // no Content-Type header — browser sets multipart boundary automatically
-      });
+    const xhr = new XMLHttpRequest();
+    xhrRef.current = xhr;
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
+    // XHR upload.onprogress — NICHT xhr.onprogress (das waere Download-Progress)
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = (e.loaded / e.total) * 100;
+        setProgress(pct);
+        setUploadedMB(e.loaded / 1_048_576);
       }
+    };
 
-      alert("File uploaded successfully!");
-      setSelectedFile(null);
-    } catch (err) {
-      alert("Error uploading file.");
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setProgress(100);
+        setUploadState("done");
+      } else {
+        setUploadState("error");
+        setErrorMsg("Server hat den Upload abgelehnt (Status " + xhr.status + ").");
+      }
+    };
+
+    xhr.onerror = () => {
+      setUploadState("error");
+      setErrorMsg("Netzwerkfehler beim Upload. Bitte erneut versuchen.");
+    };
+
+    xhr.open("POST", "/api/report");
+    xhr.send(formData);
   };
 
+  const handleReset = () => {
+    xhrRef.current?.abort();
+    setUploadState("idle");
+    setSelectedFile(null);
+    setProgress(0);
+    setErrorMsg(null);
+  };
+
+  const currentStep =
+    uploadState === "idle" ? 1 :
+    uploadState === "uploading" ? 2 :
+    uploadState === "done" ? 4 : 1;
+
   return (
-    <section className=" bg-gray-50 py-16 px-4 sm:px-8">
-      <div className="mb-16">
-        <h2 className="text-3xl text-slate-700 sm:text-4xl font-semibold text-center mb-8">
-          Upload Registry File
-        </h2>
-        <p className="mt-2 text-gray-600 text-sm text-center">
-          Select the file type and upload your clinical registry data file.
-          Supported formats include structured oBDS XML for cancer reporting.
-        </p>
+    <section className="py-12 px-4">
+      {/* Stepper */}
+      <div className="mb-10">
+        <ProcessStepper currentStep={currentStep} />
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-3xl border border-gray-200 shadow-sm max-w-md w-full mx-auto p-6 space-y-6"
-      >
-        <div>
-          <label
-            htmlFor="type"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Select Format
-          </label>
-          <select
-            id="country"
-            name="country"
-            className="block w-full rounded-md border border-gray-200 bg-white py-2 px-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10"
-          >
-            <option value="XML:oBDS_3.0.0.8a_RKI">
-              oBDS 3.0.0.8a RKI (XML)
-            </option>
-          </select>
-        </div>
+      {/* Upload-Phase */}
+      {uploadState === "idle" && (
+        <div className="max-w-lg mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-2" style={{ color: "#003063" }}>
+            XML-Datei importieren
+          </h1>
+          <p className="text-center text-sm mb-8" style={{ color: "#505050" }}>
+            Laden Sie Ihre oBDS_RKI-konforme XML-Meldedatei hoch.
+            Das System validiert sie automatisch gegen das gewählte Schema.
+          </p>
 
-        <div>
-          <label
-            htmlFor="file"
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className={`block w-full text-center border-2 border-dashed rounded-md p-6 cursor-pointer ${
-              dragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
-            }`}
+          <div
+            className="rounded-lg p-6 space-y-5"
+            style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}
           >
-            <p className="text-sm text-gray-600 mb-1 w-full overflow-hidden overflow-ellipsis">
-              {selectedFile ? selectedFile.name : "Drag & drop your file here"}
-            </p>
-            <p className="text-xs text-gray-400">or click to select</p>
-            <input
-              id="file"
-              name="file"
-              type="file"
-              accept=".xml"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
-        </div>
+            {/* Schema-Auswahl */}
+            <div>
+              <label className="block text-sm font-semibold mb-1" style={{ color: "#000000" }}>
+                Schema-Version
+              </label>
+              <select
+                value={schemaType}
+                onChange={(e) => setSchemaType(e.target.value)}
+                className="block w-full rounded border py-2 px-3 text-sm"
+                style={{ borderColor: "#D8D8D8", color: "#000000", backgroundColor: "#FFFFFF" }}
+              >
+                <option value="XML:oBDS_3.0.4_RKI">oBDS 3.0.4 RKI (aktuell)</option>
+                <option value="XML:oBDS_3.0.0.8a_RKI">oBDS 3.0.0.8a RKI (historisch)</option>
+              </select>
+            </div>
 
-        <button
-          type="submit"
-          disabled={uploading}
-          className="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-        >
-          {uploading ? "Uploading..." : "Upload File"}
-        </button>
-      </form>
+            {/* Drag & Drop Zone */}
+            <div>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+                className="flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg p-8 cursor-pointer transition-colors"
+                style={{
+                  borderColor: dragging ? "#003063" : "#D8D8D8",
+                  backgroundColor: dragging ? "#F0F4FF" : "#F2F5F7",
+                }}
+              >
+                <span className="text-3xl mb-2">&#128196;</span>
+                <p className="text-sm font-medium text-center" style={{ color: "#000000" }}>
+                  {selectedFile ? selectedFile.name : "XML-Datei hier ablegen oder klicken"}
+                </p>
+                {selectedFile && (
+                  <p className="text-xs mt-1" style={{ color: "#505050" }}>
+                    {(selectedFile.size / 1_048_576).toFixed(2)} MB
+                  </p>
+                )}
+                {!selectedFile && (
+                  <p className="text-xs mt-1" style={{ color: "#505050" }}>
+                    Unterstützt: .xml (bis 200 MB)
+                  </p>
+                )}
+                <input ref={fileInputRef} id="file" name="file" type="file" accept=".xml" onChange={handleFileChange} className="hidden" />
+              </div>
+            </div>
+
+            {/* Upload-Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedFile}
+              className="w-full py-3 rounded text-white text-sm font-semibold transition-colors disabled:opacity-40"
+              style={{ backgroundColor: selectedFile ? "#003063" : "#003063" }}
+              onMouseOver={(e) => { if (selectedFile) (e.currentTarget.style.backgroundColor = "#002853"); }}
+              onMouseOut={(e) => { (e.currentTarget.style.backgroundColor = "#003063"); }}
+            >
+              Datei hochladen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Upload läuft — Rose */}
+      {uploadState === "uploading" && (
+        <div className="max-w-sm mx-auto text-center">
+          <h2 className="text-xl font-semibold mb-2" style={{ color: "#003063" }}>
+            Datei wird übertragen …
+          </h2>
+          <p className="text-sm mb-8" style={{ color: "#505050" }}>
+            Bitte warten Sie. Schließen Sie das Fenster nicht.
+          </p>
+          <RoseProgress progress={progress} uploadedMB={uploadedMB} totalMB={totalMB} />
+        </div>
+      )}
+
+      {/* Erfolg */}
+      {uploadState === "done" && (
+        <div className="max-w-sm mx-auto text-center">
+          <div className="text-5xl mb-4">&#127800;</div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: "#003063" }}>
+            Import erfolgreich!
+          </h2>
+          <p className="text-sm mb-6" style={{ color: "#505050" }}>
+            Die Datei wurde validiert und in die Datenbank importiert.
+          </p>
+          <button
+            onClick={handleReset}
+            className="px-6 py-2 rounded text-white text-sm font-semibold"
+            style={{ backgroundColor: "#003063" }}
+          >
+            Weitere Datei importieren
+          </button>
+        </div>
+      )}
+
+      {/* Fehler */}
+      {uploadState === "error" && (
+        <div className="max-w-sm mx-auto text-center">
+          <div className="text-5xl mb-4">&#9888;&#65039;</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: "#E10019" }}>
+            Upload fehlgeschlagen
+          </h2>
+          <p className="text-sm mb-6" style={{ color: "#505050" }}>
+            {errorMsg ?? "Unbekannter Fehler."}
+          </p>
+          <button
+            onClick={handleReset}
+            className="px-6 py-2 rounded text-white text-sm font-semibold"
+            style={{ backgroundColor: "#003063" }}
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      )}
     </section>
   );
 }
