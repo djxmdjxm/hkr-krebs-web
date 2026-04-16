@@ -289,7 +289,9 @@ export default function UploadSection() {
               <summary className="cursor-pointer font-semibold">Technische Details anzeigen</summary>
               <pre className="mt-2 p-3 rounded overflow-x-auto whitespace-pre-wrap"
                 style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
-                {additionalInfo.technical_message}
+                {selectedFile ? `Datei: ${selectedFile.name}
+
+` : ""}{additionalInfo.technical_message}
               </pre>
             </details>
           )}
