@@ -42,7 +42,7 @@ export default function PageHeader() {
 
       {/* R-Umgebung */}
       <Link
-        href="http://192.168.2.7:8081/"
+        href={process.env.NEXT_PUBLIC_CODE_SERVER_URL ?? "http://localhost:8081"}
         className="px-4 py-1.5 rounded text-sm font-medium text-white border border-white border-opacity-40 hover:bg-white hover:bg-opacity-10 transition-colors"
       >
         R-Umgebung

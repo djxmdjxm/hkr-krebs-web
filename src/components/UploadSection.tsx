@@ -185,12 +185,25 @@ export default function UploadSection() {
         <div className="max-w-sm mx-auto text-center">
           <RoseProgress phase="done" uploadProgress={100} />
           <h2 className="text-2xl font-bold mt-6 mb-2" style={{ color: "#003063" }}>Import erfolgreich!</h2>
-          <p className="text-sm mb-6" style={{ color: "#505050" }}>
+          <p className="text-sm mb-4" style={{ color: "#505050" }}>
             Die Datei wurde validiert und in die Datenbank importiert.
           </p>
+          {/* Prominenter R-Button — Hauptaktion nach erfolgreichem Import */}
+          <a
+            href={process.env.NEXT_PUBLIC_CODE_SERVER_URL ?? "http://localhost:8081"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded text-white text-sm font-bold mb-3"
+            style={{ backgroundColor: "#E10019" }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#c40016"; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#E10019"; }}
+          >
+            <span style={{ fontSize: "1.2em" }}>&#x1F4CA;</span>
+            Daten in R-Umgebung analysieren
+          </a>
           <button onClick={handleReset}
-            className="px-6 py-2 rounded text-white text-sm font-semibold"
-            style={{ backgroundColor: "#003063" }}>
+            className="w-full px-6 py-2 rounded text-sm font-semibold border"
+            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent" }}>
             Weitere Datei importieren
           </button>
         </div>
@@ -198,12 +211,34 @@ export default function UploadSection() {
 
       {/* Fehler */}
       {uploadState === "error" && (
-        <div className="max-w-sm mx-auto text-center">
-          <div className="text-5xl mb-4">&#9888;&#65039;</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: "#E10019" }}>Upload fehlgeschlagen</h2>
-          <p className="text-sm mb-6" style={{ color: "#505050" }}>{errorMsg ?? "Unbekannter Fehler."}</p>
+        <div className="max-w-lg mx-auto">
+          {/* Roter Fehler-Banner */}
+          <div className="rounded-lg p-5 mb-6"
+            style={{ backgroundColor: "#FFF0F0", border: "2px solid #E10019" }}>
+            <div className="flex items-start gap-3">
+              <span style={{ fontSize: "1.5em", lineHeight: 1 }}>&#9888;&#65039;</span>
+              <div className="text-left">
+                <h2 className="text-base font-bold mb-1" style={{ color: "#E10019" }}>
+                  Import fehlgeschlagen
+                </h2>
+                <p className="text-sm" style={{ color: "#505050" }}>
+                  {errorMsg ?? "Unbekannter Fehler."}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Hinweis was zu tun ist */}
+          <div className="rounded-lg p-4 mb-6"
+            style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
+            <p className="text-sm font-semibold mb-1" style={{ color: "#003063" }}>Was kann ich tun?</p>
+            <ul className="text-sm space-y-1" style={{ color: "#505050" }}>
+              <li>&#x2022; Pruefen Sie, ob die richtige Schema-Version ausgewaehlt ist</li>
+              <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltigen oBDS_RKI-XML ist</li>
+              <li>&#x2022; Wenden Sie sich an Ihren IT-Ansprechpartner wenn der Fehler bleibt</li>
+            </ul>
+          </div>
           <button onClick={handleReset}
-            className="px-6 py-2 rounded text-white text-sm font-semibold"
+            className="w-full py-3 rounded text-white text-sm font-semibold"
             style={{ backgroundColor: "#003063" }}>
             Erneut versuchen
           </button>
