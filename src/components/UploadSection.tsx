@@ -15,6 +15,11 @@ export default function UploadSection() {
   const [uploadedMB, setUploadedMB]     = useState(0);
   const [totalMB, setTotalMB]           = useState(0);
   const [errorMsg, setErrorMsg]         = useState<string | null>(null);
+  const [additionalInfo, setAdditionalInfo] = useState<{
+    hint?: string;
+    technical_message?: string;
+    category?: string;
+  } | null>(null);
   const xhrRef      = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -59,12 +64,12 @@ export default function UploadSection() {
       setUploadState("validating");
     };
 
-    // Server-Antwort -> Phase 3 (Import) und dann Phase 4 (done) gestaffelt
+    // Server-Antwort -> Import startet async, Polling ueberwacht den Status
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        // Erst Validierungs-Animation zeigen (falls noch nicht), dann Import, dann fertig
+        const { uid } = JSON.parse(xhr.responseText);
         setUploadState("importing");
-        setTimeout(() => setUploadState("done"), 1500);
+        pollImportStatus(uid);
       } else {
         setUploadState("error");
         setErrorMsg("Server hat den Upload abgelehnt (Status " + xhr.status + ").");
@@ -86,6 +91,39 @@ export default function UploadSection() {
     setSelectedFile(null);
     setUploadProgress(0);
     setErrorMsg(null);
+    setAdditionalInfo(null);
+  };
+
+  // Pollt GET /api/report/{uid} alle 2s bis status success oder failure.
+  // Noetig weil POST /api/report nur die uid zurueckgibt -- der Import laeuft async.
+  const pollImportStatus = (uid: string) => {
+    const maxAttempts = 60; // 60 x 2s = 120s Timeout
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        setUploadState("error");
+        setErrorMsg("Zeitueberschreitung: Der Import hat zu lange gedauert.");
+        return;
+      }
+      try {
+        const res = await fetch("/api/report/" + uid);
+        if (!res.ok) return; // Verbindungsfehler: naechster Versuch
+        const data = await res.json();
+        if (data.status === "success") {
+          clearInterval(interval);
+          setUploadState("done");
+        } else if (data.status === "failure") {
+          clearInterval(interval);
+          const info = data.additional_info ?? null;
+          setAdditionalInfo(info);
+          setErrorMsg(info?.hint ?? "Import fehlgeschlagen.");
+          setUploadState("error");
+        }
+        // status "created" oder "pending": weiter warten
+      } catch (_) { /* Netzwerkfehler: naechster Versuch */ }
+    }, 2000);
   };
 
   // Stepper-Schritt
@@ -227,16 +265,34 @@ export default function UploadSection() {
               </div>
             </div>
           </div>
-          {/* Hinweis was zu tun ist */}
-          <div className="rounded-lg p-4 mb-6"
-            style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
-            <p className="text-sm font-semibold mb-1" style={{ color: "#003063" }}>Was kann ich tun?</p>
-            <ul className="text-sm space-y-1" style={{ color: "#505050" }}>
-              <li>&#x2022; Pruefen Sie, ob die richtige Schema-Version ausgewaehlt ist</li>
-              <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltigen oBDS_RKI-XML ist</li>
-              <li>&#x2022; Wenden Sie sich an Ihren IT-Ansprechpartner wenn der Fehler bleibt</li>
-            </ul>
-          </div>
+          {/* Kontextspezifischer Hinweis fuer Mediziner (F9) */}
+          {additionalInfo?.hint ? (
+            <div className="rounded-lg p-4 mb-6"
+              style={{ backgroundColor: "#FFF8E1", border: "1px solid #F0B429" }}>
+              <p className="text-sm font-semibold mb-1" style={{ color: "#7A4100" }}>Was koennen Sie tun?</p>
+              <p className="text-sm" style={{ color: "#505050" }}>{additionalInfo.hint}</p>
+            </div>
+          ) : (
+            <div className="rounded-lg p-4 mb-6"
+              style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
+              <p className="text-sm font-semibold mb-1" style={{ color: "#003063" }}>Was kann ich tun?</p>
+              <ul className="text-sm space-y-1" style={{ color: "#505050" }}>
+                <li>&#x2022; Pruefen Sie, ob die richtige Schema-Version ausgewaehlt ist</li>
+                <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltigen oBDS_RKI-XML ist</li>
+                <li>&#x2022; Wenden Sie sich an Ihren IT-Ansprechpartner wenn der Fehler bleibt</li>
+              </ul>
+            </div>
+          )}
+          {/* Einklappbare technische Details fuer IT/Admin */}
+          {additionalInfo?.technical_message && (
+            <details className="mb-6 text-xs" style={{ color: "#505050" }}>
+              <summary className="cursor-pointer font-semibold">Technische Details anzeigen</summary>
+              <pre className="mt-2 p-3 rounded overflow-x-auto whitespace-pre-wrap"
+                style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
+                {additionalInfo.technical_message}
+              </pre>
+            </details>
+          )}
           <button onClick={handleReset}
             className="w-full py-3 rounded text-white text-sm font-semibold"
             style={{ backgroundColor: "#003063" }}>
