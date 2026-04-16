@@ -15,6 +15,7 @@ export default function UploadSection() {
   const [uploadedMB, setUploadedMB]     = useState(0);
   const [totalMB, setTotalMB]           = useState(0);
   const [errorMsg, setErrorMsg]         = useState<string | null>(null);
+  const [errorStep, setErrorStep]           = useState<number>(2); // Schritt auf dem Fehler passiert ist
   const [additionalInfo, setAdditionalInfo] = useState<{
     hint?: string;
     technical_message?: string;
@@ -64,11 +65,11 @@ export default function UploadSection() {
       setUploadState("validating");
     };
 
-    // Server-Antwort -> Import startet async, Polling ueberwacht den Status
+    // Server-Antwort -> Import startet async, Polling ueberwacht den Status.
+    // "validating" bleibt aktiv bis Polling success/failure meldet -- kein voreiliges "importing".
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         const { uid } = JSON.parse(xhr.responseText);
-        setUploadState("importing");
         pollImportStatus(uid);
       } else {
         setUploadState("error");
@@ -92,6 +93,7 @@ export default function UploadSection() {
     setUploadProgress(0);
     setErrorMsg(null);
     setAdditionalInfo(null);
+    setErrorStep(2);
   };
 
   // Pollt GET /api/report/{uid} alle 2s bis status success oder failure.
@@ -127,14 +129,14 @@ export default function UploadSection() {
   };
 
   // Stepper-Schritt
-  // Im Fehlerfall bleibt Schritt 2 (Validierung) aktiv -- der Fehler tritt dort auf
+  // Im Fehlerfall: errorStep zeigt den Schritt wo der Fehler auftrat (kein Zurueckspringen)
   const currentStep =
     uploadState === "idle"       ? 1 :
     uploadState === "uploading"  ? 2 :
     uploadState === "validating" ? 2 :
     uploadState === "importing"  ? 3 :
     uploadState === "done"       ? 4 :
-    uploadState === "error"      ? 2 : 1;
+    uploadState === "error"      ? errorStep : 1;
 
   // Rose-Phase
   const rosePhase: RosePhase =
