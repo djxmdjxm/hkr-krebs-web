@@ -127,12 +127,14 @@ export default function UploadSection() {
   };
 
   // Stepper-Schritt
+  // Im Fehlerfall bleibt Schritt 2 (Validierung) aktiv -- der Fehler tritt dort auf
   const currentStep =
     uploadState === "idle"       ? 1 :
     uploadState === "uploading"  ? 2 :
     uploadState === "validating" ? 2 :
     uploadState === "importing"  ? 3 :
-    uploadState === "done"       ? 4 : 1;
+    uploadState === "done"       ? 4 :
+    uploadState === "error"      ? 2 : 1;
 
   // Rose-Phase
   const rosePhase: RosePhase =
