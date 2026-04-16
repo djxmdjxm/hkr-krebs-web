@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Rose Demo</title>
+<style>
+  body { background: #F2F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: Arial, sans-serif; }
+  h2 { color: #003063; margin-bottom: 8px; }
+  p { color: #505050; font-size: 14px; margin-bottom: 32px; }
+  .counter { font-size: 28px; font-weight: bold; color: #003063; margin-top: 16px; }
+  .mb-info { font-size: 13px; color: #505050; margin-top: 4px; }
+  button { margin-top: 24px; padding: 10px 28px; background: #003063; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  button:hover { background: #002853; }
+</style>
+</head>
+<body>
+<h2>Upload-Fortschritt</h2>
+<p>Datei wird übertragen … Bitte warten.</p>
+
+<svg id="rose" width="140" height="200" viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stiel -->
+  <path id="stem" d="M60 170 C60 140 58 120 60 95" stroke="#2D7A2D" stroke-width="3" stroke-linecap="round" stroke-dasharray="120" stroke-dashoffset="120"/>
+  <!-- Blatt links -->
+  <path id="leaf1" d="M57 145 C45 138 38 128 42 118 C50 122 56 132 57 145" stroke="#2D7A2D" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="60" stroke-dashoffset="60"/>
+  <!-- Blatt rechts -->
+  <path id="leaf2" d="M63 130 C75 123 82 112 78 102 C70 106 64 118 63 130" stroke="#2D7A2D" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="60" stroke-dashoffset="60"/>
+  <!-- Blütenblatt 1 oben -->
+  <path id="p1" d="M60 90 C55 72 50 60 60 50 C70 60 65 72 60 90" stroke="#E10019" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="80" stroke-dashoffset="80"/>
+  <!-- Blütenblatt 2 rechts oben -->
+  <path id="p2" d="M60 90 C76 80 88 74 93 63 C80 58 70 68 60 90" stroke="#E10019" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="80" stroke-dashoffset="80"/>
+  <!-- Blütenblatt 3 rechts unten -->
+  <path id="p3" d="M60 90 C78 92 90 100 91 112 C78 113 67 103 60 90" stroke="#E10019" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="80" stroke-dashoffset="80"/>
+  <!-- Blütenblatt 4 links unten -->
+  <path id="p4" d="M60 90 C42 92 30 100 29 112 C42 113 53 103 60 90" stroke="#E10019" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="80" stroke-dashoffset="80"/>
+  <!-- Blütenblatt 5 links oben -->
+  <path id="p5" d="M60 90 C44 80 32 74 27 63 C40 58 50 68 60 90" stroke="#E10019" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="80" stroke-dashoffset="80"/>
+  <!-- Mitte -->
+  <circle id="center" cx="60" cy="90" r="8" fill="#E10019" opacity="0"/>
+</svg>
+
+<div class="counter" id="pct">0 %</div>
+<div class="mb-info" id="mbinfo">0.0 MB von 18.7 MB</div>
+<button onclick="restart()">Nochmal abspielen</button>
+
+<script>
+let progress = 0;
+let timer = null;
+
+function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function update(p) {
+  // Stiel: 0-40%
+  const stemP = clamp(p / 40, 0, 1);
+  document.getElementById('stem').style.strokeDashoffset = 120 * (1 - stemP);
+
+  // Blätter
+  const l1 = clamp(p / 30, 0, 1);
+  const l2 = clamp((p - 15) / 25, 0, 1);
+  document.getElementById('leaf1').style.strokeDashoffset = 60 * (1 - l1);
+  document.getElementById('leaf2').style.strokeDashoffset = 60 * (1 - Math.max(0, l2));
+
+  // Blütenblätter: 40-100%, gestaffelt
+  const delays = [0, 0.15, 0.30, 0.45, 0.60];
+  const petalP = clamp((p - 40) / 60, 0, 1);
+  delays.forEach((d, i) => {
+    const pp = clamp((petalP - d) / (1 - d + 0.001), 0, 1);
+    document.getElementById('p' + (i+1)).style.strokeDashoffset = 80 * (1 - pp);
+  });
+
+  // Mitte
+  const centerOpacity = clamp((p - 95) / 5, 0, 1);
+  document.getElementById('center').style.opacity = centerOpacity;
+
+  // Text
+  document.getElementById('pct').textContent = Math.round(p) + ' %';
+  document.getElementById('mbinfo').textContent = (p / 100 * 18.7).toFixed(1) + ' MB von 18.7 MB';
+}
+
+function animate() {
+  if (progress >= 100) {
+    update(100);
+    return;
+  }
+  progress += 0.6; // ~100s bei 60fps, hier ~3s
+  update(progress);
+  timer = requestAnimationFrame(animate);
+}
+
+function restart() {
+  if (timer) cancelAnimationFrame(timer);
+  progress = 0;
+  update(0);
+  animate();
+}
+
+animate();
+</script>
+</body>
+</html>
