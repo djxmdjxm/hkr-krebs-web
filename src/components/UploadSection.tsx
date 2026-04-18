@@ -182,11 +182,10 @@ export default function UploadSection() {
 
             {/* Drop-Zone */}
             <div
-              onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
-              className="flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg p-8 cursor-pointer transition-colors"
+              className="relative flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg p-8 cursor-pointer transition-colors"
               style={{ borderColor: dragging ? "#003063" : "#D8D8D8", backgroundColor: dragging ? "#F0F4FF" : "#F2F5F7" }}>
               <span className="text-3xl mb-2">&#128196;</span>
               <p className="text-sm font-medium text-center" style={{ color: "#000000" }}>
@@ -196,7 +195,7 @@ export default function UploadSection() {
                 ? <p className="text-xs mt-1" style={{ color: "#505050" }}>{(selectedFile.size / 1_048_576).toFixed(2)} MB</p>
                 : <p className="text-xs mt-1" style={{ color: "#505050" }}>Unterstuetzt: .xml (bis 200 MB)</p>
               }
-              <input ref={fileInputRef} id="file" name="file" type="file" accept=".xml" onChange={handleFileChange} className="hidden" />
+              <input ref={fileInputRef} id="file" name="file" type="file" accept=".xml" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
             </div>
 
             {/* Button */}
