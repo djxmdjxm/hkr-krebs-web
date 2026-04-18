@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
 WORKDIR /app
 
 # Install *all* deps to build
@@ -9,7 +9,7 @@ RUN npm ci
 # Copy source and build
 COPY . .
 # If you use standalone output, set `output: 'standalone'` in next.config.js
-RUN npm run build
+RUN npx next build
 
 # ---- Runtime stage ----
 FROM node:22-alpine AS runner
