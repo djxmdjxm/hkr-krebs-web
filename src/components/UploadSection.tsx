@@ -20,6 +20,7 @@ export default function UploadSection() {
     hint?: string;
     technical_message?: string;
     category?: string;
+    error_type?: string;
   } | null>(null);
   const xhrRef      = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
