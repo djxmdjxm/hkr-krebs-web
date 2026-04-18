@@ -30,7 +30,7 @@ export default function UploadSection() {
     if (file) setSelectedFile(file);
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files?.[0];
