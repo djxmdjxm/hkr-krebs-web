@@ -261,7 +261,7 @@ export default function UploadSection() {
               <span style={{ fontSize: "1.5em", lineHeight: 1 }}>&#9888;&#65039;</span>
               <div className="text-left">
                 <h2 className="text-base font-bold mb-1" style={{ color: "#E10019" }}>
-                  Import fehlgeschlagen
+                  {additionalInfo?.error_type === "xsd_validation" ? "Validierung fehlgeschlagen" : "Import fehlgeschlagen"}
                 </h2>
                 <p className="text-sm" style={{ color: "#505050" }}>
                   {errorMsg ?? "Unbekannter Fehler."}
