@@ -215,7 +215,7 @@ export default function UploadSection() {
           </h1>
           <p className="text-center text-sm mb-8" style={{ color: "#505050" }}>
             Laden Sie Ihre oBDS_RKI-konforme XML-Meldedatei hoch.
-            Das System validiert sie automatisch gegen das gewaehlte Schema.
+            Das Schema wird automatisch aus der Datei erkannt und validiert.
           </p>
           <div className="rounded-lg p-6 space-y-5"
             style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
