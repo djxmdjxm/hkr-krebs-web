@@ -16,11 +16,40 @@ type ImportSummary = {
   max_diagnosis_year: number | null;
 };
 
+type SchemaDetection =
+  | null
+  | { status: "known";       version: string; type: string; label: string }
+  | { status: "unsupported"; version: string }
+  | { status: "missing" };
+
+const SCHEMA_MAP: Record<string, { label: string; type: string }> = {
+  "3.0.4_RKI":    { label: "oBDS 3.0.4 RKI",    type: "XML:oBDS_3.0.4_RKI" },
+  "3.0.0.8a_RKI": { label: "oBDS 3.0.0.8a RKI", type: "XML:oBDS_3.0.0.8a_RKI" },
+};
+
+const SUPPORTED_LABELS = Object.values(SCHEMA_MAP).map(s => s.label);
+
+async function detectSchemaFromFile(file: File): Promise<SchemaDetection> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const match = text.match(/Schema_Version=['"]([^'"]+)['"]/);
+      if (!match) { resolve({ status: "missing" }); return; }
+      const version = match[1];
+      const entry = SCHEMA_MAP[version];
+      if (entry) resolve({ status: "known", version, type: entry.type, label: entry.label });
+      else       resolve({ status: "unsupported", version });
+    };
+    reader.readAsText(file.slice(0, 4096));
+  });
+}
+
 export default function UploadSection() {
-  const [dragging, setDragging]         = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [schemaType, setSchemaType]     = useState("XML:oBDS_3.0.4_RKI");
-  const [uploadState, setUploadState]   = useState<UploadState>("idle");
+  const [dragging, setDragging]               = useState(false);
+  const [selectedFile, setSelectedFile]       = useState<File | null>(null);
+  const [schemaDetection, setSchemaDetection] = useState<SchemaDetection>(null);
+  const [uploadState, setUploadState]         = useState<UploadState>("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedMB, setUploadedMB]     = useState(0);
   const [totalMB, setTotalMB]           = useState(0);
@@ -36,20 +65,26 @@ export default function UploadSection() {
   const xhrRef      = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const applyFile = (file: File) => {
+    setSelectedFile(file);
+    setSchemaDetection(null);
+    detectSchemaFromFile(file).then(setSchemaDetection);
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) applyFile(file);
   };
 
   const handleDrop = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) applyFile(file);
   };
 
   const handleSubmit = () => {
-    if (!selectedFile) return;
+    if (!selectedFile || schemaDetection?.status !== "known") return;
 
     setUploadState("uploading");
     setUploadProgress(0);
@@ -57,7 +92,7 @@ export default function UploadSection() {
     setTotalMB(selectedFile.size / 1_048_576);
 
     const formData = new FormData();
-    formData.append("type", schemaType);
+    formData.append("type", schemaDetection.type);
     formData.append("file", selectedFile);
 
     const xhr = new XMLHttpRequest();
@@ -102,6 +137,7 @@ export default function UploadSection() {
     xhrRef.current?.abort();
     setUploadState("idle");
     setSelectedFile(null);
+    setSchemaDetection(null);
     setUploadProgress(0);
     setErrorMsg(null);
     setAdditionalInfo(null);
@@ -184,19 +220,6 @@ export default function UploadSection() {
           <div className="rounded-lg p-6 space-y-5"
             style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
 
-            {/* Schema-Auswahl */}
-            <div>
-              <label className="block text-sm font-semibold mb-1" style={{ color: "#000000" }}>
-                Schema-Version
-              </label>
-              <select value={schemaType} onChange={(e) => setSchemaType(e.target.value)}
-                className="block w-full rounded border py-2 px-3 text-sm"
-                style={{ borderColor: "#D8D8D8", color: "#000000", backgroundColor: "#FFFFFF" }}>
-                <option value="XML:oBDS_3.0.4_RKI">oBDS 3.0.4 RKI (aktuell)</option>
-                <option value="XML:oBDS_3.0.0.8a_RKI">oBDS 3.0.0.8a RKI (historisch)</option>
-              </select>
-            </div>
-
             {/* Drop-Zone */}
             <label htmlFor="file"
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -210,16 +233,51 @@ export default function UploadSection() {
               </p>
               {selectedFile
                 ? <p className="text-xs mt-1" style={{ color: "#505050" }}>{(selectedFile.size / 1_048_576).toFixed(2)} MB</p>
-                : <p className="text-xs mt-1" style={{ color: "#505050" }}>Unterstuetzt: .xml (bis 200 MB)</p>
+                : <p className="text-xs mt-1" style={{ color: "#505050" }}>Unterstuetzt: .xml bis 200 MB &middot; {SUPPORTED_LABELS.join(" · ")}</p>
               }
               <input ref={fileInputRef} id="file" name="file" type="file" accept=".xml" onChange={handleFileChange} className="sr-only" />
             </label>
 
+            {/* Schema-Erkennungs-Badge */}
+            {selectedFile && schemaDetection === null && (
+              <p className="text-xs text-center" style={{ color: "#505050" }}>Schema wird erkannt…</p>
+            )}
+            {schemaDetection?.status === "known" && (
+              <div className="flex items-center gap-2 rounded px-3 py-2 text-sm"
+                style={{ backgroundColor: "#F0FFF4", border: "1px solid #22C55E" }}>
+                <span style={{ color: "#16A34A" }}>&#10003;</span>
+                <span style={{ color: "#166534" }}>
+                  Schema erkannt: <strong>{schemaDetection.label}</strong>
+                </span>
+              </div>
+            )}
+            {schemaDetection?.status === "unsupported" && (
+              <div className="rounded px-3 py-2 text-sm"
+                style={{ backgroundColor: "#FFF0F0", border: "1px solid #E10019" }}>
+                <p className="font-semibold" style={{ color: "#E10019" }}>
+                  Unbekanntes Schema: {schemaDetection.version}
+                </p>
+                <p className="mt-0.5" style={{ color: "#505050" }}>
+                  Unterstuetzt werden: {SUPPORTED_LABELS.join(", ")}
+                </p>
+              </div>
+            )}
+            {schemaDetection?.status === "missing" && (
+              <div className="rounded px-3 py-2 text-sm"
+                style={{ backgroundColor: "#FFF8E1", border: "1px solid #F0B429" }}>
+                <p className="font-semibold" style={{ color: "#7A4100" }}>Schema-Version nicht gefunden</p>
+                <p className="mt-0.5" style={{ color: "#505050" }}>
+                  Die Datei enthaelt kein <code>Schema_Version</code>-Attribut. Bitte pruefen Sie, ob es sich um eine gueltige oBDS_RKI-XML-Datei handelt.
+                </p>
+              </div>
+            )}
+
             {/* Button */}
-            <button onClick={handleSubmit} disabled={!selectedFile}
+            <button onClick={handleSubmit}
+              disabled={schemaDetection?.status !== "known"}
               className="w-full py-3 rounded text-white text-sm font-semibold disabled:opacity-40"
               style={{ backgroundColor: "#003063" }}
-              onMouseOver={(e) => { if (selectedFile) (e.currentTarget.style.backgroundColor = "#002853"); }}
+              onMouseOver={(e) => { if (schemaDetection?.status === "known") (e.currentTarget.style.backgroundColor = "#002853"); }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#003063"; }}>
               Datei hochladen
             </button>
@@ -358,8 +416,8 @@ export default function UploadSection() {
               style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
               <p className="text-sm font-semibold mb-1" style={{ color: "#003063" }}>Was kann ich tun?</p>
               <ul className="text-sm space-y-1" style={{ color: "#505050" }}>
-                <li>&#x2022; Pruefen Sie, ob die richtige Schema-Version ausgewaehlt ist</li>
-                <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltigen oBDS_RKI-XML ist</li>
+                <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltige oBDS_RKI-XML ist</li>
+                <li>&#x2022; Pruefen Sie, ob das Schema_Version-Attribut korrekt gesetzt ist</li>
                 <li>&#x2022; Wenden Sie sich an Ihren IT-Ansprechpartner wenn der Fehler bleibt</li>
               </ul>
             </div>
