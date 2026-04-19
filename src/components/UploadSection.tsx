@@ -299,7 +299,7 @@ export default function UploadSection() {
                 <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
                   {importSummary.tumor_count?.toLocaleString('de-DE') ?? '—'}
                 </div>
-                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Tumormeldungen</div>
+                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Fälle</div>
               </div>
             </div>
           )}
