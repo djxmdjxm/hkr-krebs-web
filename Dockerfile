@@ -8,6 +8,8 @@ RUN npm ci
 
 # Copy source and build
 COPY . .
+ARG BUILD_VERSION=dev
+ENV NEXT_PUBLIC_BUILD_VERSION=$BUILD_VERSION
 # If you use standalone output, set `output: 'standalone'` in next.config.js
 RUN npx next build
 

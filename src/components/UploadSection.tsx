@@ -6,6 +6,16 @@ import RoseProgress, { RosePhase } from "./RoseProgress";
 
 type UploadState = "idle" | "uploading" | "validating" | "importing" | "done" | "error";
 
+type ImportSummary = {
+  patient_count: number | null;
+  median_age: number | null;
+  min_age: number | null;
+  max_age: number | null;
+  tumor_count: number | null;
+  min_diagnosis_year: number | null;
+  max_diagnosis_year: number | null;
+};
+
 export default function UploadSection() {
   const [dragging, setDragging]         = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -22,6 +32,7 @@ export default function UploadSection() {
     category?: string;
     error_type?: string;
   } | null>(null);
+  const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
   const xhrRef      = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -95,6 +106,7 @@ export default function UploadSection() {
     setErrorMsg(null);
     setAdditionalInfo(null);
     setErrorStep(2);
+    setImportSummary(null);
   };
 
   // Pollt GET /api/report/{uid} alle 2s bis status success oder failure.
@@ -116,6 +128,11 @@ export default function UploadSection() {
         const data = await res.json();
         if (data.status === "success") {
           clearInterval(interval);
+          // Fetch KPI summary — best-effort, non-blocking
+          fetch("/api/report/" + uid + "/summary")
+            .then(r => r.ok ? r.json() : null)
+            .then(summary => { if (summary) setImportSummary(summary); })
+            .catch(() => {});
           setUploadState("done");
         } else if (data.status === "failure") {
           clearInterval(interval);
@@ -136,7 +153,7 @@ export default function UploadSection() {
     uploadState === "uploading"  ? 2 :
     uploadState === "validating" ? 2 :
     uploadState === "importing"  ? 3 :
-    uploadState === "done"       ? 4 :
+    uploadState === "done"       ? 5 :  // 5 > 4 → alle Schritte als ✓
     uploadState === "error"      ? errorStep : 1;
 
   // Rose-Phase
@@ -222,23 +239,83 @@ export default function UploadSection() {
         </div>
       )}
 
-      {/* Erfolg */}
+      {/* Importbericht */}
       {uploadState === "done" && (
-        <div className="max-w-sm mx-auto text-center">
-          <RoseProgress phase="done" uploadProgress={100} />
-          <h2 className="text-2xl font-bold mt-6 mb-2" style={{ color: "#003063" }}>Import erfolgreich!</h2>
-          <p className="text-sm mb-4" style={{ color: "#505050" }}>
-            Die Datei wurde validiert und in die Datenbank importiert.
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <RoseProgress phase="done" uploadProgress={100} />
+            <h2 className="text-2xl font-bold mt-6 mb-1" style={{ color: "#003063" }}>Importbericht</h2>
+            <p className="text-sm" style={{ color: "#505050" }}>
+              Die Datei wurde erfolgreich validiert und importiert.
+            </p>
+          </div>
+
+          {/* Kennzahlen-Cards */}
+          {importSummary && (
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {/* Patienten */}
+              <div className="rounded-lg p-5 text-center"
+                style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F465;</div>
+                <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                  {importSummary.patient_count?.toLocaleString('de-DE') ?? '—'}
+                </div>
+                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Patienten</div>
+              </div>
+
+              {/* Diagnosejahre */}
+              <div className="rounded-lg p-5 text-center"
+                style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F4C5;</div>
+                <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                  {importSummary.min_diagnosis_year != null && importSummary.max_diagnosis_year != null
+                    ? importSummary.min_diagnosis_year === importSummary.max_diagnosis_year
+                      ? importSummary.min_diagnosis_year
+                      : `${importSummary.min_diagnosis_year}–${importSummary.max_diagnosis_year}`
+                    : '—'}
+                </div>
+                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Diagnosejahre</div>
+              </div>
+
+              {/* Medianes Alter */}
+              <div className="rounded-lg p-5 text-center"
+                style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F4CA;</div>
+                <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                  {importSummary.median_age != null ? `${importSummary.median_age} J.` : '—'}
+                </div>
+                {importSummary.min_age != null && importSummary.max_age != null && (
+                  <div className="text-xs mt-0.5" style={{ color: "#505050" }}>
+                    {importSummary.min_age}–{importSummary.max_age} Jahre
+                  </div>
+                )}
+                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Medianes Alter</div>
+              </div>
+
+              {/* Tumormeldungen */}
+              <div className="rounded-lg p-5 text-center"
+                style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F489;</div>
+                <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                  {importSummary.tumor_count?.toLocaleString('de-DE') ?? '—'}
+                </div>
+                <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Tumormeldungen</div>
+              </div>
+            </div>
+          )}
+
+          {/* R-Umgebung Button */}
+          <p className="text-sm text-center mb-3" style={{ color: "#505050" }}>
+            Die importierten Daten stehen jetzt in der R-Umgebung bereit.
           </p>
-          {/* Prominenter R-Button — Hauptaktion nach erfolgreichem Import */}
           <a
             href={process.env.NEXT_PUBLIC_CODE_SERVER_URL ?? "http://localhost:8081"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-3 rounded text-white text-sm font-bold mb-3"
-            style={{ backgroundColor: "#E10019" }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#c40016"; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#E10019"; }}
+            style={{ backgroundColor: "#003063" }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#002853"; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#003063"; }}
           >
             <span style={{ fontSize: "1.2em" }}>&#x1F4CA;</span>
             Daten in R-Umgebung analysieren
