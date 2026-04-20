@@ -3,6 +3,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import ProcessStepper from "./ProcessStepper";
 import RoseProgress, { RosePhase } from "./RoseProgress";
+import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 type UploadState = "idle" | "uploading" | "validating" | "importing" | "done" | "error";
 
@@ -46,6 +47,7 @@ async function detectSchemaFromFile(file: File): Promise<SchemaDetection> {
 }
 
 export default function UploadSection() {
+  const codeServerUrl = useCodeServerUrl();
   const [dragging, setDragging]               = useState(false);
   const [selectedFile, setSelectedFile]       = useState<File | null>(null);
   const [schemaDetection, setSchemaDetection] = useState<SchemaDetection>(null);
@@ -367,7 +369,7 @@ export default function UploadSection() {
             Die importierten Daten stehen jetzt in der R-Umgebung bereit.
           </p>
           <a
-            href={process.env.NEXT_PUBLIC_CODE_SERVER_URL ?? "http://localhost:8081"}
+            href={codeServerUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-3 rounded text-white text-sm font-bold mb-3"

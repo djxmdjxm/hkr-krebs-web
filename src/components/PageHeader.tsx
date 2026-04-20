@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 export default function PageHeader() {
   const pathname = usePathname();
+  const codeServerUrl = useCodeServerUrl();
 
   const links = [
     { label: "Upload", href: "/registry" },
@@ -42,7 +44,7 @@ export default function PageHeader() {
 
       {/* R-Umgebung */}
       <Link
-        href={process.env.NEXT_PUBLIC_CODE_SERVER_URL ?? "http://localhost:8081"}
+        href={codeServerUrl}
         className="px-4 py-1.5 rounded text-sm font-medium text-white border border-white border-opacity-40 hover:bg-white hover:bg-opacity-10 transition-colors"
       >
         R-Umgebung
