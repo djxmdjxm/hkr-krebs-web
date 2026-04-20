@@ -7,6 +7,8 @@ interface RoseProgressProps {
   uploadProgress: number; // 0-100, nur relevant in Phase "uploading"
   uploadedMB?: number;
   totalMB?: number;
+  size?: number;        // 0.0–1.0, skaliert SVG-Dimensionen (default 1.0)
+  showLabel?: boolean;  // false = kein Statustext (default true)
 }
 
 /**
@@ -17,7 +19,9 @@ interface RoseProgressProps {
  * Etappe 3 — "importing":   Bluete leuchtet auf, rote Mitte erscheint (DB-Import)
  * Fertig    — "done":        Rose vollstaendig geoeffnet, still
  */
-export default function RoseProgress({ phase, uploadProgress, uploadedMB, totalMB }: RoseProgressProps) {
+export default function RoseProgress({ phase, uploadProgress, uploadedMB, totalMB, size = 1, showLabel = true }: RoseProgressProps) {
+  const svgW = Math.round(140 * size);
+  const svgH = Math.round(200 * size);
 
   // --- Stiel: waechst waehrend Upload ---
   const stemP = phase === "uploading" ? uploadProgress / 100 : 1;
@@ -54,7 +58,7 @@ export default function RoseProgress({ phase, uploadProgress, uploadedMB, totalM
   return (
     <div className="flex flex-col items-center gap-4">
       <svg
-        width="140" height="200"
+        width={svgW} height={svgH}
         viewBox="0 0 120 180"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -128,16 +132,17 @@ export default function RoseProgress({ phase, uploadProgress, uploadedMB, totalM
         <circle className="center-dot" cx="60" cy="90" fill="#E10019" />
       </svg>
 
-      {/* Status */}
-      <div className="text-center">
-        <div className="text-lg font-bold" style={{ color: "#003063" }}>{statusText}</div>
-        <div className="text-sm mt-1" style={{ color: "#505050" }}>{subText}</div>
-        {phase === "uploading" && (
-          <div className="text-2xl font-bold mt-2" style={{ color: "#003063" }}>
-            {Math.round(uploadProgress)}&nbsp;%
-          </div>
-        )}
-      </div>
+      {showLabel && (
+        <div className="text-center">
+          <div className="text-lg font-bold" style={{ color: "#003063" }}>{statusText}</div>
+          <div className="text-sm mt-1" style={{ color: "#505050" }}>{subText}</div>
+          {phase === "uploading" && (
+            <div className="text-2xl font-bold mt-2" style={{ color: "#003063" }}>
+              {Math.round(uploadProgress)}&nbsp;%
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
