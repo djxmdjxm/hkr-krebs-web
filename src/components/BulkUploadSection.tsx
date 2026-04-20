@@ -37,6 +37,15 @@ type FileItem = {
 
 type QueueEntry = { localId: string; file: File; schemaType: string };
 
+// ---- ID generation (crypto.randomUUID unavailable on non-HTTPS) -----------
+
+function generateId(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
 // ---- Schema detection (mirrors UploadSection) -----------------------------
 
 const SCHEMA_MAP: Record<string, { label: string; type: string }> = {
@@ -228,7 +237,7 @@ export default function BulkUploadSection() {
     setOverLimit(false);
 
     const newItems: FileItem[] = files.map(file => ({
-      localId: crypto.randomUUID(),
+      localId: generateId(),
       file,
       schema: null,
       uploadProgress: 0,
