@@ -10,7 +10,7 @@ export default function PageHeader() {
 
   const links = [
     { label: "Upload", href: "/registry" },
-    { label: "Datenbank", href: "/schema" },
+    { label: "Dokumentation", href: "/schema" },
     { label: "About", href: "/about" },
   ];
 
