@@ -44,6 +44,8 @@ export default function PageHeader() {
       {/* R-Umgebung */}
       <Link
         href={codeServerUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         className="px-4 py-1.5 rounded text-sm font-medium text-white border border-white border-opacity-40 hover:bg-white hover:bg-opacity-10 transition-colors"
       >
         R-Umgebung

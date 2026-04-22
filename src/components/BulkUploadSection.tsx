@@ -711,6 +711,8 @@ export default function BulkUploadSection() {
           </button>
           <Link
             href={codeServerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex-1 py-2.5 rounded text-sm font-semibold border text-center no-underline"
             style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center" }}
             onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#F0F4FF"; }}
