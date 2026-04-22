@@ -21,7 +21,6 @@ export default function PageHeader() {
     >
       {/* Logo */}
       <Link href="/" className="flex items-center gap-3 no-underline">
-        <span className="text-2xl">&#127800;</span>
         <span className="font-bold text-xl text-white tracking-wide">KIKA</span>
         <span className="text-xs font-light text-white opacity-70 hidden sm:block">
           Hamburgisches Krebsregister
