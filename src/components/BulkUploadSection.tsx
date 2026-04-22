@@ -36,6 +36,7 @@ type FileItem = {
   errorMsg?: string;
   errorCategory?: string;
   errorPath?: string;
+  warnings?: Array<{ path: string; category: string; message: string }>;
 };
 
 type QueueEntry = { localId: string; file: File; schemaType: string };
@@ -130,13 +131,22 @@ export default function BulkUploadSection() {
           const res = await fetch(`/api/report/${uid}`);
           if (!res.ok) return;
           const data = await res.json();
-          if (data.status === "success") {
+          if (data.status === "success" || data.status === "success_with_warnings") {
             clearInterval(interval);
             updateFileItem(localId, { phase: "importing" });
+            const fileWarnings: Array<{ path: string; category: string; message: string }> =
+              data.status === "success_with_warnings" ? (data.additional_info?.warnings ?? []) : [];
             fetch(`/api/report/${uid}/summary`)
               .then(r => r.ok ? r.json() : null)
-              .then(summary => updateFileItem(localId, { phase: "done", summary: summary ?? undefined }))
-              .catch(() => updateFileItem(localId, { phase: "done" }));
+              .then(summary => updateFileItem(localId, {
+                phase: "done",
+                summary: summary ?? undefined,
+                warnings: fileWarnings.length > 0 ? fileWarnings : undefined,
+              }))
+              .catch(() => updateFileItem(localId, {
+                phase: "done",
+                warnings: fileWarnings.length > 0 ? fileWarnings : undefined,
+              }));
             resolve();
           } else if (data.status === "failure") {
             clearInterval(interval);
@@ -674,11 +684,13 @@ export default function BulkUploadSection() {
                       {item.file.name}
                     </td>
                     <td className="px-3 py-2 text-center">
-                      {item.phase === "done"
+                      {item.phase === "done" && !item.warnings?.length
                         ? <span style={{ color: "#16A34A", fontWeight: 600 }}>✓ Erfolg</span>
-                        : item.phase === "schema-error"
-                          ? <span style={{ color: "#7A4100", fontWeight: 600 }}>⚠ Schema</span>
-                          : <span style={{ color: "#E10019", fontWeight: 600 }}>✗ Fehler</span>
+                        : item.phase === "done" && item.warnings?.length
+                          ? <span style={{ color: "#7A4100", fontWeight: 600 }}>⚠ {item.warnings.length} Warn.</span>
+                          : item.phase === "schema-error"
+                            ? <span style={{ color: "#7A4100", fontWeight: 600 }}>⚠ Schema</span>
+                            : <span style={{ color: "#E10019", fontWeight: 600 }}>✗ Fehler</span>
                       }
                     </td>
                     <td className="px-3 py-2 text-center" style={{ color: "#003063" }}>
@@ -697,6 +709,12 @@ export default function BulkUploadSection() {
                           {item.errorPath}
                         </div>
                       )}
+                      {item.warnings?.map((w, i) => (
+                        <div key={i} className="mt-1 text-xs" style={{ color: "#7A4100" }}>
+                          {w.message}
+                          {w.path && <div className="font-mono break-all" style={{ color: "#909090" }}>{w.path}</div>}
+                        </div>
+                      ))}
                     </td>
                   </tr>
                 );

@@ -65,6 +65,7 @@ export default function UploadSection() {
     error_type?: string;
   } | null>(null);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
+  const [importWarnings, setImportWarnings] = useState<Array<{ path: string; category: string; message: string }>>([]);
   const xhrRef      = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -165,9 +166,11 @@ export default function UploadSection() {
         const res = await fetch("/api/report/" + uid);
         if (!res.ok) return; // Verbindungsfehler: naechster Versuch
         const data = await res.json();
-        if (data.status === "success") {
+        if (data.status === "success" || data.status === "success_with_warnings") {
           clearInterval(interval);
-          // Fetch KPI summary — best-effort, non-blocking
+          if (data.status === "success_with_warnings" && data.additional_info?.warnings) {
+            setImportWarnings(data.additional_info.warnings);
+          }
           fetch("/api/report/" + uid + "/summary")
             .then(r => r.ok ? r.json() : null)
             .then(summary => { if (summary) setImportSummary(summary); })
@@ -363,6 +366,25 @@ export default function UploadSection() {
                 <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Fälle</div>
               </div>
             </div>
+          )}
+
+          {/* Warnungen (Datenqualität) */}
+          {importWarnings.length > 0 && (
+            <details className="mb-6 rounded-lg overflow-hidden" style={{ border: "1px solid #F0B429" }}>
+              <summary className="px-4 py-3 cursor-pointer text-sm font-semibold flex items-center gap-2"
+                style={{ backgroundColor: "#FFF8E1", color: "#7A4100", listStyle: "none" }}>
+                <span>&#9888;</span>
+                {importWarnings.length} {importWarnings.length === 1 ? "Warnung" : "Warnungen"} — Datenqualität prüfen
+              </summary>
+              <ul className="divide-y text-xs" style={{ backgroundColor: "#FFFDF0", borderColor: "#F0E0A0" }}>
+                {importWarnings.map((w, i) => (
+                  <li key={i} className="px-4 py-2.5">
+                    <div style={{ color: "#505050" }}>{w.message}</div>
+                    {w.path && <div className="font-mono mt-0.5 break-all" style={{ color: "#909090" }}>{w.path}</div>}
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
 
           {/* R-Umgebung Button */}
