@@ -7,6 +7,15 @@ import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 // ---- Types ----------------------------------------------------------------
 
+type ImportWarning = {
+  patient_id: string;
+  tumor_id:   string;
+  feld:       string;
+  wert:       string;
+  kategorie:  string;
+  hinweis:    string;
+};
+
 type FilePhase = "pending" | "uploading" | "validating" | "importing" | "done" | "error" | "schema-error";
 
 type SchemaDetection =
@@ -36,7 +45,7 @@ type FileItem = {
   errorMsg?: string;
   errorCategory?: string;
   errorPath?: string;
-  warnings?: Array<{ path: string; category: string; message: string }>;
+  warnings?: ImportWarning[];
 };
 
 type QueueEntry = { localId: string; file: File; schemaType: string };
@@ -71,6 +80,25 @@ async function detectSchemaFromFile(file: File): Promise<SchemaDetection> {
     };
     reader.readAsText(file.slice(0, 4096));
   });
+}
+
+// ---- CSV export -----------------------------------------------------------
+
+function downloadWarningsCsv(warnings: ImportWarning[], filenameHint: string) {
+  const header = ["Patient-ID", "Tumor-ID", "Feld", "Wert", "Kategorie", "Hinweis"];
+  const rows = warnings.map(w => [w.patient_id, w.tumor_id, w.feld, w.wert, w.kategorie, w.hinweis]);
+  const csv = [header, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";"))
+    .join("\r\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `qualitaetsbericht-${filenameHint.replace(/\.xml$/i, "")}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ---- Rose garden sizing ---------------------------------------------------
@@ -134,7 +162,7 @@ export default function BulkUploadSection() {
           if (data.status === "success" || data.status === "success_with_warnings") {
             clearInterval(interval);
             updateFileItem(localId, { phase: "importing" });
-            const fileWarnings: Array<{ path: string; category: string; message: string }> =
+            const fileWarnings: ImportWarning[] =
               data.status === "success_with_warnings" ? (data.additional_info?.warnings ?? []) : [];
             fetch(`/api/report/${uid}/summary`)
               .then(r => r.ok ? r.json() : null)
@@ -351,6 +379,27 @@ export default function BulkUploadSection() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `massenimport-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAllWarningsCsvDownload = () => {
+    const allWarnings = fileItems.flatMap(f =>
+      (f.warnings ?? []).map(w => ({ dateiname: f.file.name, ...w }))
+    );
+    if (allWarnings.length === 0) return;
+    const header = ["Dateiname", "Patient-ID", "Tumor-ID", "Feld", "Wert", "Kategorie", "Hinweis"];
+    const rows = allWarnings.map(w => [w.dateiname, w.patient_id, w.tumor_id, w.feld, w.wert, w.kategorie, w.hinweis]);
+    const csv = [header, ...rows]
+      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";"))
+      .join("\r\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qualitaetsbericht-gesamt-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -660,7 +709,7 @@ export default function BulkUploadSection() {
                 <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Patienten</th>
                 <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Fälle</th>
                 <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Diagnosejahre</th>
-                <th className="text-left px-3 py-2 font-semibold" style={{ color: "#003063" }}>Fehler</th>
+                <th className="text-left px-3 py-2 font-semibold" style={{ color: "#003063" }}>Hinweise</th>
               </tr>
             </thead>
             <tbody>
@@ -709,12 +758,15 @@ export default function BulkUploadSection() {
                           {item.errorPath}
                         </div>
                       )}
-                      {item.warnings?.map((w, i) => (
-                        <div key={i} className="mt-1 text-xs" style={{ color: "#7A4100" }}>
-                          {w.message}
-                          {w.path && <div className="font-mono break-all" style={{ color: "#909090" }}>{w.path}</div>}
-                        </div>
-                      ))}
+                      {item.warnings && item.warnings.length > 0 && (
+                        <button
+                          onClick={() => downloadWarningsCsv(item.warnings!, item.file.name)}
+                          className="mt-1 text-xs px-2 py-1 rounded border font-medium"
+                          style={{ borderColor: "#F0B429", color: "#7A4100", backgroundColor: "#FFF8E1" }}
+                        >
+                          &#x2B07; {item.warnings.length} Qualitätsprobleme (CSV)
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -732,8 +784,19 @@ export default function BulkUploadSection() {
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#F0F4FF"; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
           >
-            &#x2B07; CSV herunterladen
+            &#x2B07; Importbericht CSV
           </button>
+          {fileItems.some(f => f.warnings && f.warnings.length > 0) && (
+            <button
+              onClick={handleAllWarningsCsvDownload}
+              className="flex-1 py-2.5 rounded text-sm font-semibold border"
+              style={{ color: "#7A4100", borderColor: "#F0B429", backgroundColor: "#FFF8E1", minWidth: "140px" }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#FFF3CC"; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#FFF8E1"; }}
+            >
+              &#x2B07; Qualitätsbericht gesamt
+            </button>
+          )}
           <Link
             href={codeServerUrl}
             target="_blank"

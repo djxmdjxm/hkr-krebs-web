@@ -112,11 +112,11 @@ export default function AboutPage() {
           </p>
           <p>
             <a
-              href="mailto:christopher.mangels@innopard.com"
+              href="mailto:annemarie.schultz@bwfg.hamburg.de"
               className="font-medium underline"
               style={{ color: "#003063" }}
             >
-              christopher.mangels@innopard.com
+              annemarie.schultz@bwfg.hamburg.de
             </a>
           </p>
         </div>
