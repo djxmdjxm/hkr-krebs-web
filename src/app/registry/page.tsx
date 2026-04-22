@@ -37,12 +37,9 @@ export default function Registry() {
       {tab === "single" ? <UploadSection /> : <BulkUploadSection />}
 
       {/* Datenverwaltung */}
-      <div className="max-w-2xl mx-auto px-4 pb-12 mt-2">
-        <div className="rounded-lg px-5 py-4" style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#505050" }}>Datenverwaltung</p>
-          <p className="text-xs mb-3" style={{ color: "#505050" }}>
-            Alle importierten Patientendaten, Tumormeldungen und Import-Protokolle unwiderruflich löschen — z.B. vor einem vollständigen Neuimport.
-          </p>
+      <div className="max-w-2xl mx-auto px-4 pb-10">
+        <div className="border-t pt-4 flex items-center gap-4" style={{ borderColor: "#D8D8D8" }}>
+          <span className="text-xs shrink-0" style={{ color: "#909090" }}>Neustart:</span>
           <DatabaseResetButton />
         </div>
       </div>

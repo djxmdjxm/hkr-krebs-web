@@ -95,10 +95,10 @@ export default function DatabaseResetButton() {
   return (
     <button
       onClick={() => setPhase("confirm")}
-      className="w-full py-2.5 rounded text-sm font-semibold text-white"
-      style={{ backgroundColor: "#E10019" }}
-      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#C00015"; }}
-      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#E10019"; }}
+      className="text-xs px-3 py-1.5 rounded border"
+      style={{ color: "#E10019", borderColor: "#E10019", backgroundColor: "transparent" }}
+      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#FFF5F5"; }}
+      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
     >
       Datenbank zurücksetzen
     </button>
