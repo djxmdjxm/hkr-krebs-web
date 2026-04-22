@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from "react";
+import Link from "next/link";
 import RoseProgress, { RosePhase } from "./RoseProgress";
+import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 // ---- Types ----------------------------------------------------------------
 
@@ -92,6 +94,7 @@ export default function BulkUploadSection() {
   const [fileItems, setFileItems]   = useState<FileItem[]>([]);
   const [uiPhase, setUiPhase]       = useState<"selection" | "uploading" | "done">("selection");
   const [overLimit, setOverLimit]   = useState(false);
+  const codeServerUrl               = useCodeServerUrl();
 
   const fileItemsRef   = useRef<FileItem[]>([]);
   const activeCountRef = useRef(0);
@@ -548,6 +551,28 @@ export default function BulkUploadSection() {
     );
   }
 
+  // ---- Aggregate summary from successful files --------------------------------
+
+  const successItems = fileItems.filter(f => f.phase === "done" && f.summary != null);
+  const aggSummary = successItems.length > 0 ? (() => {
+    const patient_count      = successItems.reduce((s, f) => s + (f.summary!.patient_count ?? 0), 0);
+    const tumor_count        = successItems.reduce((s, f) => s + (f.summary!.tumor_count ?? 0), 0);
+    const minYears           = successItems.map(f => f.summary!.min_diagnosis_year).filter((v): v is number => v != null);
+    const maxYears           = successItems.map(f => f.summary!.max_diagnosis_year).filter((v): v is number => v != null);
+    const medians            = successItems.map(f => f.summary!.median_age).filter((v): v is number => v != null);
+    const minAges            = successItems.map(f => f.summary!.min_age).filter((v): v is number => v != null);
+    const maxAges            = successItems.map(f => f.summary!.max_age).filter((v): v is number => v != null);
+    return {
+      patient_count,
+      tumor_count,
+      min_diagnosis_year: minYears.length > 0 ? Math.min(...minYears) : null,
+      max_diagnosis_year: maxYears.length > 0 ? Math.max(...maxYears) : null,
+      median_age:         medians.length > 0 ? Math.round(medians.reduce((a, b) => a + b, 0) / medians.length) : null,
+      min_age:            minAges.length > 0 ? Math.min(...minAges) : null,
+      max_age:            maxAges.length > 0 ? Math.max(...maxAges) : null,
+    };
+  })() : null;
+
   // ---- Render: Done phase (Log table) --------------------------------------
 
   return (
@@ -569,6 +594,49 @@ export default function BulkUploadSection() {
             <RoseItem key={item.localId} item={item} />
           ))}
         </div>
+
+        {/* Aggregierte KPI-Karten */}
+        {aggSummary && (
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="rounded-lg p-5 text-center" style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+              <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F465;</div>
+              <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                {aggSummary.patient_count.toLocaleString("de-DE")}
+              </div>
+              <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Patienten</div>
+            </div>
+            <div className="rounded-lg p-5 text-center" style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+              <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F4C5;</div>
+              <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                {aggSummary.min_diagnosis_year != null && aggSummary.max_diagnosis_year != null
+                  ? aggSummary.min_diagnosis_year === aggSummary.max_diagnosis_year
+                    ? aggSummary.min_diagnosis_year
+                    : `${aggSummary.min_diagnosis_year}–${aggSummary.max_diagnosis_year}`
+                  : "—"}
+              </div>
+              <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Diagnosejahre</div>
+            </div>
+            <div className="rounded-lg p-5 text-center" style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+              <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F4CA;</div>
+              <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                {aggSummary.median_age != null ? `${aggSummary.median_age} J.` : "—"}
+              </div>
+              {aggSummary.min_age != null && aggSummary.max_age != null && (
+                <div className="text-xs mt-0.5" style={{ color: "#505050" }}>
+                  {aggSummary.min_age}–{aggSummary.max_age} Jahre
+                </div>
+              )}
+              <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Medianes Alter</div>
+            </div>
+            <div className="rounded-lg p-5 text-center" style={{ backgroundColor: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid #D8D8D8" }}>
+              <div style={{ fontSize: "2em", lineHeight: 1 }}>&#x1F489;</div>
+              <div className="text-3xl font-bold mt-2" style={{ color: "#003063" }}>
+                {aggSummary.tumor_count.toLocaleString("de-DE")}
+              </div>
+              <div className="text-sm mt-1 font-semibold" style={{ color: "#505050" }}>Fälle</div>
+            </div>
+          </div>
+        )}
 
         {/* Log table */}
         <div className="rounded-lg overflow-hidden mb-4" style={{ border: "1px solid #D8D8D8", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
@@ -631,20 +699,29 @@ export default function BulkUploadSection() {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleCsvDownload}
             className="flex-1 py-2.5 rounded text-sm font-semibold border"
-            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent" }}
+            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px" }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#F0F4FF"; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
           >
             &#x2B07; CSV herunterladen
           </button>
+          <Link
+            href={codeServerUrl}
+            className="flex-1 py-2.5 rounded text-sm font-semibold border text-center no-underline"
+            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center" }}
+            onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#F0F4FF"; }}
+            onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
+          >
+            R-Umgebung öffnen
+          </Link>
           <button
             onClick={handleReset}
             className="flex-1 py-2.5 rounded text-white text-sm font-semibold"
-            style={{ backgroundColor: "#003063" }}
+            style={{ backgroundColor: "#003063", minWidth: "140px" }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#002853"; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#003063"; }}
           >

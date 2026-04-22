@@ -15,6 +15,7 @@ import RadiotherapySessionMetabolicDoc from "@/components/db-docs/RadiotherapySe
 import TumorSystemicTherapyDoc from "@/components/db-docs/TumorSystemicTherapy";
 import TumorFollowUpDoc from "@/components/db-docs/TumorFollowUpDoc";
 import PageHeader from "@/components/PageHeader";
+import DatabaseResetButton from "@/components/DatabaseResetButton";
 
 export default function Schema() {
   return (
@@ -43,6 +44,19 @@ export default function Schema() {
           height={1200}
           alt="Picture of the author"
         />
+      </section>
+
+      {/* Datenverwaltung */}
+      <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
+        <h2 className="text-2xl font-bold mb-2" style={{ color: "#003063" }}>Datenverwaltung</h2>
+        <p className="text-sm mb-5" style={{ color: "#505050" }}>
+          Setzt die gesamte Krebsregister-Datenbank zurück — alle Patientendaten, Tumormeldungen
+          und Import-Protokolle werden unwiderruflich gelöscht. Nutzen Sie diese Funktion,
+          wenn Sie Daten korrigiert haben und einen vollständigen Neuimport durchführen möchten.
+        </p>
+        <div className="max-w-sm">
+          <DatabaseResetButton />
+        </div>
       </section>
 
       <PatientReportDoc />
