@@ -146,7 +146,7 @@ export default function BulkUploadSection() {
   const pollStatus = useCallback((localId: string, uid: string): Promise<void> => {
     return new Promise((resolve) => {
       let attempts = 0;
-      const MAX = 60;
+      const MAX = 150; // 150 x 2s = 300s Timeout
       const interval = setInterval(async () => {
         attempts++;
         if (attempts > MAX) {
