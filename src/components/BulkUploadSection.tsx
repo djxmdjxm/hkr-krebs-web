@@ -35,6 +35,7 @@ type FileItem = {
   summary?: ImportSummary;
   errorMsg?: string;
   errorCategory?: string;
+  errorPath?: string;
 };
 
 type QueueEntry = { localId: string; file: File; schemaType: string };
@@ -144,6 +145,7 @@ export default function BulkUploadSection() {
               phase: "error",
               errorMsg: info?.hint ?? "Import fehlgeschlagen.",
               errorCategory: info?.category ?? undefined,
+              errorPath: info?.path ?? undefined,
             });
             resolve();
           }
@@ -690,6 +692,11 @@ export default function BulkUploadSection() {
                     </td>
                     <td className="px-3 py-2 text-sm" style={{ color: "#505050" }}>
                       {item.errorMsg ?? ""}
+                      {item.errorPath && (
+                        <div className="text-xs mt-0.5 font-mono break-all" style={{ color: "#909090" }}>
+                          {item.errorPath}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );

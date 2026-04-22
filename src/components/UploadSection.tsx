@@ -60,6 +60,7 @@ export default function UploadSection() {
   const [additionalInfo, setAdditionalInfo] = useState<{
     hint?: string;
     technical_message?: string;
+    path?: string;
     category?: string;
     error_type?: string;
   } | null>(null);
@@ -430,9 +431,7 @@ export default function UploadSection() {
               <summary className="cursor-pointer font-semibold">Technische Details anzeigen</summary>
               <pre className="mt-2 p-3 rounded overflow-x-auto whitespace-pre-wrap"
                 style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
-                {selectedFile ? `Datei: ${selectedFile.name}
-
-` : ""}{additionalInfo.technical_message}
+                {selectedFile ? `Datei: ${selectedFile.name}\n` : ""}{additionalInfo.path ? `XML-Pfad: ${additionalInfo.path}\n\n` : ""}{additionalInfo.technical_message}
               </pre>
             </details>
           )}
