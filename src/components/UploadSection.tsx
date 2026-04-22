@@ -396,44 +396,19 @@ export default function UploadSection() {
 
           {/* Datenqualitätsbericht */}
           {importWarnings.length > 0 && (
-            <div className="mb-6 rounded-lg overflow-hidden" style={{ border: "1px solid #F0B429" }}>
-              <div className="px-4 py-3 flex items-center justify-between gap-3"
-                style={{ backgroundColor: "#FFF8E1" }}>
-                <span className="text-sm font-semibold" style={{ color: "#7A4100" }}>
-                  &#9888; {importWarnings.length} Datenqualitätsprobleme — Datei wurde trotzdem importiert
-                </span>
-                <button
-                  onClick={() => downloadWarningsCsv(importWarnings, selectedFile?.name ?? "import")}
-                  className="text-xs px-3 py-1.5 rounded border font-medium shrink-0"
-                  style={{ borderColor: "#F0B429", color: "#7A4100", backgroundColor: "#FFFDF0" }}
-                >
-                  &#x2B07; Bericht als CSV
-                </button>
-              </div>
-              <div style={{ overflowX: "auto" }}>
-                <table className="w-full text-xs" style={{ minWidth: "680px" }}>
-                  <thead>
-                    <tr style={{ backgroundColor: "#FFF3CC", borderBottom: "1px solid #F0E0A0" }}>
-                      <th className="text-left px-3 py-2 font-semibold" style={{ color: "#7A4100" }}>Patient-ID</th>
-                      <th className="text-left px-3 py-2 font-semibold" style={{ color: "#7A4100" }}>Tumor-ID</th>
-                      <th className="text-left px-3 py-2 font-semibold" style={{ color: "#7A4100" }}>Feld</th>
-                      <th className="text-left px-3 py-2 font-semibold" style={{ color: "#7A4100" }}>Wert</th>
-                      <th className="text-left px-3 py-2 font-semibold" style={{ color: "#7A4100" }}>Empfehlung</th>
-                    </tr>
-                  </thead>
-                  <tbody style={{ backgroundColor: "#FFFDF0" }}>
-                    {importWarnings.map((w, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #F0E8C0" }}>
-                        <td className="px-3 py-2 font-mono" style={{ color: "#505050", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={w.patient_id}>{w.patient_id}</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: "#505050", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={w.tumor_id}>{w.tumor_id}</td>
-                        <td className="px-3 py-2 font-mono font-medium" style={{ color: "#505050" }}>{w.feld}</td>
-                        <td className="px-3 py-2 font-mono font-semibold" style={{ color: "#7A4100" }}>{w.wert}</td>
-                        <td className="px-3 py-2" style={{ color: "#505050" }}>{w.hinweis}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <div className="mb-6 rounded-lg px-4 py-3 flex items-center justify-between gap-3"
+              style={{ backgroundColor: "#FFF8E1", border: "1px solid #F0B429" }}>
+              <span className="text-sm" style={{ color: "#7A4100" }}>
+                <span className="font-semibold">&#9888; {importWarnings.length} Datenqualitätsprobleme</span>
+                {" "}— Datei wurde trotzdem vollständig importiert
+              </span>
+              <button
+                onClick={() => downloadWarningsCsv(importWarnings, selectedFile?.name ?? "import")}
+                className="text-xs px-3 py-1.5 rounded border font-medium shrink-0"
+                style={{ borderColor: "#F0B429", color: "#7A4100", backgroundColor: "#FFFDF0" }}
+              >
+                &#x2B07; Qualitätsbericht CSV
+              </button>
             </div>
           )}
 
