@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { useState, useRef, useEffect, DragEvent, ChangeEvent } from "react";
 import ProcessStepper from "./ProcessStepper";
 import RoseProgress, { RosePhase } from "./RoseProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
@@ -92,8 +92,42 @@ export default function UploadSection() {
   } | null>(null);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
   const [importWarnings, setImportWarnings] = useState<ImportWarning[]>([]);
-  const xhrRef      = useRef<XMLHttpRequest | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [flowerProgress, setFlowerProgress] = useState(0);
+  const xhrRef           = useRef<XMLHttpRequest | null>(null);
+  const fileInputRef     = useRef<HTMLInputElement | null>(null);
+  const flowerTimerRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Phase "uploading": Fortschritt direkt aus XHR (0–25% Gesamtfortschritt)
+  useEffect(() => {
+    if (uploadState === "uploading") {
+      setFlowerProgress(uploadProgress * 0.25);
+    }
+  }, [uploadProgress, uploadState]);
+
+  // Andere Phasen: Timer-basierte Animation
+  // validating: 25→50 in ~8s · importing: 50→88 in ~4min · done: 100
+  useEffect(() => {
+    if (flowerTimerRef.current) {
+      clearInterval(flowerTimerRef.current);
+      flowerTimerRef.current = null;
+    }
+    if (uploadState === "validating") {
+      flowerTimerRef.current = setInterval(() => {
+        setFlowerProgress(p => Math.min(50, p + 1.5625)); // ~16 Ticks × 1.5625 = 25 Punkte
+      }, 500);
+    } else if (uploadState === "importing") {
+      flowerTimerRef.current = setInterval(() => {
+        setFlowerProgress(p => Math.min(88, p + 0.079)); // ~480 Ticks × 0.079 = 38 Punkte ≈ 4min
+      }, 500);
+    } else if (uploadState === "done") {
+      setFlowerProgress(100);
+    } else if (uploadState === "idle") {
+      setFlowerProgress(0);
+    }
+    return () => {
+      if (flowerTimerRef.current) clearInterval(flowerTimerRef.current);
+    };
+  }, [uploadState]);
 
   const applyFile = (file: File) => {
     setSelectedFile(file);
@@ -165,6 +199,11 @@ export default function UploadSection() {
 
   const handleReset = () => {
     xhrRef.current?.abort();
+    if (flowerTimerRef.current) {
+      clearInterval(flowerTimerRef.current);
+      flowerTimerRef.current = null;
+    }
+    setFlowerProgress(0);
     setUploadState("idle");
     setSelectedFile(null);
     setSchemaDetection(null);
@@ -192,7 +231,9 @@ export default function UploadSection() {
         const res = await fetch("/api/report/" + uid);
         if (!res.ok) return; // Verbindungsfehler: naechster Versuch
         const data = await res.json();
-        if (data.status === "success" || data.status === "success_with_warnings") {
+        if (data.status === "pending") {
+          setUploadState("importing"); // Worker hat Job aufgenommen → Blüte öffnet sich langsam
+        } else if (data.status === "success" || data.status === "success_with_warnings") {
           clearInterval(interval);
           if (data.status === "success_with_warnings" && data.additional_info?.warnings) {
             setImportWarnings(data.additional_info.warnings);
@@ -321,8 +362,8 @@ export default function UploadSection() {
       {showRose && uploadState !== "done" && (
         <div className="max-w-sm mx-auto text-center">
           <RoseProgress
+            progress={flowerProgress}
             phase={rosePhase}
-            uploadProgress={uploadProgress}
             uploadedMB={uploadedMB}
             totalMB={totalMB}
           />
@@ -333,7 +374,7 @@ export default function UploadSection() {
       {uploadState === "done" && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <RoseProgress phase="done" uploadProgress={100} />
+            <RoseProgress progress={100} phase="done" />
             <h2 className="text-2xl font-bold mt-6 mb-1" style={{ color: "#003063" }}>Importbericht</h2>
             <p className="text-sm" style={{ color: "#505050" }}>
               Die Datei wurde erfolgreich validiert und importiert.

@@ -1,14 +1,14 @@
 export default function TumorReportBreastDoc() {
   return (
     <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
-      <h2 className="text-3xl font-bold mb-6">🩺 Tumor Report Breast Table</h2>
+      <h2 className="text-3xl font-bold mb-6">🩺 Tumorbericht Mamma</h2>
 
       <table className="min-w-full text-sm text-left border border-gray-300 rounded-lg overflow-hidden">
         <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
           <tr>
-            <th className="p-3">Field</th>
-            <th className="p-3">Type</th>
-            <th className="p-3">Description (EN / DE)</th>
+            <th className="p-3">Feld</th>
+            <th className="p-3">Typ</th>
+            <th className="p-3">Beschreibung</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">

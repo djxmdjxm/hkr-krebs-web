@@ -117,6 +117,21 @@ function toRosePhase(p: FilePhase): RosePhase {
   return "uploading";
 }
 
+// ---- Blumen-Fortschritt aus Phase ableiten (ohne Timer, rein deterministisch) ----
+
+function computeFlowerProgress(phase: FilePhase, uploadProgress: number): number {
+  switch (phase) {
+    case "pending":      return 0;
+    case "uploading":    return uploadProgress * 0.25;  // 0–25
+    case "validating":   return 40;                      // Stiel + Blätter fertig, Knospe sichtbar
+    case "importing":    return 70;                      // Blüte halb geöffnet
+    case "done":         return 100;                     // voll erblüht
+    case "error":        return 22;                      // Stiel fast fertig, keine Blüte
+    case "schema-error": return 0;
+    default:             return 0;
+  }
+}
+
 // ---- Component ------------------------------------------------------------
 
 export default function BulkUploadSection() {
@@ -441,10 +456,10 @@ export default function BulkUploadSection() {
 
     const roseEl = (
       <RoseProgress
+        progress={computeFlowerProgress(item.phase, item.uploadProgress)}
+        phase={toRosePhase(item.phase)}
         size={roseSize}
         showLabel={false}
-        phase={toRosePhase(item.phase)}
-        uploadProgress={item.uploadProgress}
       />
     );
 

@@ -7,14 +7,14 @@ export default function TnmDoc() {
 
   return (
     <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
-      <h2 className="text-3xl font-bold mb-6">🧬 TNM Table</h2>
+      <h2 className="text-3xl font-bold mb-6">🧬 TNM-Tabelle</h2>
 
       <table className="w-full text-sm text-left border border-gray-300 rounded-lg overflow-hidden">
         <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
           <tr>
-            <th className="p-3">Field</th>
-            <th className="p-3">Type</th>
-            <th className="p-3">Description (EN / DE)</th>
+            <th className="p-3">Feld</th>
+            <th className="p-3">Typ</th>
+            <th className="p-3">Beschreibung</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -161,7 +161,7 @@ export default function TnmDoc() {
                 onClick={() => setShowUiccStages(!showUiccStages)}
                 className="mt-2 text-xs text-blue-600 underline"
               >
-                {showUiccStages ? "Hide stages" : "Show all stages"}
+                {showUiccStages ? "Stufen ausblenden" : "Alle Stufen anzeigen"}
               </button>
               {showUiccStages && (
                 <div className="mt-2 flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
