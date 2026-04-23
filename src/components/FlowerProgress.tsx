@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 
 export type FlowerVariant = "rose" | "sunflower" | "daisy" | "tulip" | "cherry";
 export type FlowerPhase   = "uploading" | "validating" | "importing" | "done";
