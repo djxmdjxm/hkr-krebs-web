@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, DragEvent, ChangeEvent } from "react";
 import ProcessStepper from "./ProcessStepper";
-import AnchorProgress, { AnchorPhase } from "./AnchorProgress";
+import FlowerProgress, { FlowerPhase, FlowerVariant, randomVariant } from "./FlowerProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 type UploadState = "idle" | "uploading" | "validating" | "importing" | "done" | "error";
@@ -183,6 +183,7 @@ export default function UploadSection() {
   const handleSubmit = () => {
     if (!selectedFile || schemaDetection?.status !== "known") return;
 
+    setFlowerVariant(randomVariant());
     setUploadState("uploading");
     setUploadProgress(0);
     setErrorMsg(null);
@@ -298,8 +299,11 @@ export default function UploadSection() {
     uploadState === "done"       ? 5 :  // 5 > 4 → alle Schritte als ✓
     uploadState === "error"      ? errorStep : 1;
 
-  // Rose-Phase
-  const rosePhase: AnchorPhase =
+  // Blumen-Variante: einmalig beim Mount gewählt, wechselt bei jedem neuen Upload
+  const [flowerVariant, setFlowerVariant] = useState<FlowerVariant>(randomVariant);
+
+  // Blumen-Phase
+  const rosePhase: FlowerPhase =
     uploadState === "validating" ? "validating" :
     uploadState === "importing"  ? "importing"  :
     uploadState === "done"       ? "done"       : "uploading";
@@ -391,10 +395,11 @@ export default function UploadSection() {
         </div>
       )}
 
-      {/* Rose — 3 Etappen */}
+      {/* Blume — 3 Etappen */}
       {showRose && uploadState !== "done" && (
         <div className="max-w-sm mx-auto text-center">
-          <AnchorProgress
+          <FlowerProgress
+            variant={flowerVariant}
             progress={flowerProgress}
             phase={rosePhase}
             uploadedMB={uploadedMB}
@@ -407,7 +412,7 @@ export default function UploadSection() {
       {uploadState === "done" && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <AnchorProgress progress={100} phase="done" />
+            <FlowerProgress variant={flowerVariant} progress={100} phase="done" />
             <h2 className="text-2xl font-bold mt-6 mb-1" style={{ color: "#003063" }}>Importbericht</h2>
             <p className="text-sm" style={{ color: "#505050" }}>
               Die Datei wurde erfolgreich validiert und importiert.

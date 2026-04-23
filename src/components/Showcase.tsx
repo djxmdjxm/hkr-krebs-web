@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import AnchorProgress from "./AnchorProgress";
+import FlowerProgress, { FlowerVariant, randomVariant } from "./FlowerProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 export default function Showcase() {
   const codeServerUrl = useCodeServerUrl();
+  const [variant] = useState<FlowerVariant>(randomVariant);
 
   return (
     <section
@@ -14,7 +16,7 @@ export default function Showcase() {
     >
       {/* Rose */}
       <div className="mb-6">
-        <AnchorProgress progress={100} phase="done" showLabel={false} size={1.2} />
+        <FlowerProgress variant={variant} progress={100} phase="done" showLabel={false} size={1.2} />
       </div>
 
       {/* Titel */}

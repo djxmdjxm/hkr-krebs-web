@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from "react";
 import Link from "next/link";
-import AnchorProgress, { AnchorPhase } from "./AnchorProgress";
+import FlowerProgress, { FlowerPhase, FlowerVariant, variantFromString } from "./FlowerProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 // ---- Types ----------------------------------------------------------------
@@ -41,6 +41,7 @@ type FileItem = {
   serverUid?: string;
   uploadProgress: number;
   phase: FilePhase;
+  variant: FlowerVariant;
   summary?: ImportSummary;
   errorMsg?: string;
   errorCategory?: string;
@@ -108,9 +109,9 @@ function calcRoseSize(count: number): number {
   return Math.min(1.0, Math.max(0.2, (800 / count) / 140));
 }
 
-// ---- Phase → AnchorProgress phase mapping ----------------------------------
+// ---- Phase → FlowerProgress phase mapping ----------------------------------
 
-function toRosePhase(p: FilePhase): AnchorPhase {
+function toFlowerPhase(p: FilePhase): FlowerPhase {
   if (p === "validating") return "validating";
   if (p === "importing")  return "importing";
   if (p === "done")       return "done";
@@ -300,6 +301,7 @@ export default function BulkUploadSection() {
       schema: null,
       uploadProgress: 0,
       phase: "pending" as FilePhase,
+      variant: variantFromString(file.name + String(file.size)),
     }));
 
     setFileItems(prev => [...prev, ...newItems]);
@@ -455,9 +457,10 @@ export default function BulkUploadSection() {
     const overlayColor = item.phase === "done" ? "#16A34A" : "#E10019";
 
     const roseEl = (
-      <AnchorProgress
+      <FlowerProgress
+        variant={item.variant}
         progress={computeFlowerProgress(item.phase, item.uploadProgress)}
-        phase={toRosePhase(item.phase)}
+        phase={toFlowerPhase(item.phase)}
         size={roseSize}
         showLabel={false}
       />
