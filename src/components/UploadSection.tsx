@@ -547,24 +547,6 @@ export default function UploadSection() {
               </div>
             </div>
           </div>
-          {/* Kontextspezifischer Hinweis fuer Mediziner (F9) */}
-          {additionalInfo?.hint ? (
-            <div className="rounded-lg p-4 mb-6"
-              style={{ backgroundColor: "#FFF8E1", border: "1px solid #F0B429" }}>
-              <p className="text-sm font-semibold mb-1" style={{ color: "#7A4100" }}>Was koennen Sie tun?</p>
-              <p className="text-sm" style={{ color: "#505050" }}>{additionalInfo.hint}</p>
-            </div>
-          ) : (
-            <div className="rounded-lg p-4 mb-6"
-              style={{ backgroundColor: "#F2F5F7", border: "1px solid #D8D8D8" }}>
-              <p className="text-sm font-semibold mb-1" style={{ color: "#003063" }}>Was kann ich tun?</p>
-              <ul className="text-sm space-y-1" style={{ color: "#505050" }}>
-                <li>&#x2022; Stellen Sie sicher, dass die Datei eine gueltige oBDS_RKI-XML ist</li>
-                <li>&#x2022; Pruefen Sie, ob das Schema_Version-Attribut korrekt gesetzt ist</li>
-                <li>&#x2022; Wenden Sie sich an Ihren IT-Ansprechpartner wenn der Fehler bleibt</li>
-              </ul>
-            </div>
-          )}
           {/* Einklappbare technische Details fuer IT/Admin */}
           {additionalInfo?.technical_message && (
             <details className="mb-6 text-xs" style={{ color: "#505050" }}>
