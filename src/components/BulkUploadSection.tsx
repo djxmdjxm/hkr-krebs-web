@@ -430,9 +430,6 @@ export default function BulkUploadSection() {
   const doneCount = fileItems.filter(f => f.phase === "done").length;
   const errorCount = fileItems.filter(f => f.phase === "error" || f.phase === "schema-error").length;
   const totalCount = fileItems.length;
-  const processingCount = fileItems.filter(f =>
-    f.phase === "uploading" || f.phase === "validating" || f.phase === "importing"
-  ).length;
 
   // ---- Schema badge helper -------------------------------------------------
 
