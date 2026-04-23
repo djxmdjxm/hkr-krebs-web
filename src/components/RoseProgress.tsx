@@ -28,20 +28,20 @@ export default function RoseProgress({
   const svgH = Math.round(200 * size);
 
   // Fortschrittsfenster je Element:
-  //  0–25  → Stiel wächst           (Phase: uploading)
-  // 15–35  → Blatt links erscheint  (Phase: uploading → validating)
-  // 25–45  → Blatt rechts erscheint (Phase: validating)
-  // 38–79  → Blütenblätter öffnen sich gestaffelt (Phase: importing)
-  // 86–100 → Blütenmitte erscheint  (Phase: done)
-  const stemP   = p01(progress, 0,  25);
-  const leaf1P  = p01(progress, 15, 35);
-  const leaf2P  = p01(progress, 25, 45);
-  const petal1P = p01(progress, 38, 55);
-  const petal2P = p01(progress, 44, 61);
-  const petal3P = p01(progress, 50, 67);
-  const petal4P = p01(progress, 56, 73);
-  const petal5P = p01(progress, 62, 79);
-  const centerP = p01(progress, 86, 100);
+  //  0–22  → Stiel wächst                          (Phase: uploading)
+  //  8–20  → Blatt links erscheint                 (Phase: uploading)
+  // 16–25  → Blatt rechts erscheint                (Phase: uploading)
+  // 44–52  → Mittelpunkt erscheint                 (Ende Validierung → Importstart)
+  // 50–87  → Blütenblätter öffnen sich gestaffelt  (Phase: importing)
+  const stemP   = p01(progress,  0, 22);
+  const leaf1P  = p01(progress,  8, 20);
+  const leaf2P  = p01(progress, 16, 25);
+  const centerP = p01(progress, 44, 52);
+  const petal1P = p01(progress, 50, 63);
+  const petal2P = p01(progress, 56, 69);
+  const petal3P = p01(progress, 62, 75);
+  const petal4P = p01(progress, 68, 81);
+  const petal5P = p01(progress, 74, 87);
 
   const stemDash  = 120;
   const leafDash  = 60;
@@ -92,49 +92,45 @@ export default function RoseProgress({
           style={{ transition: tr }}
         />
 
-        {/* Blütenblatt 1 */}
+        {/* Blütenmitte — erscheint am Ende der Validierung, bevor die Blütenblätter kommen */}
+        <circle
+          cx="60" cy="90"
+          r={8 * centerP}
+          fill="#E10019"
+          opacity={centerP}
+          style={{ transition: "r 0.6s ease, opacity 0.6s ease" }}
+        />
+
+        {/* Blütenblätter — öffnen sich gestaffelt während des Imports */}
         <path d="M60 90 C55 72 50 60 60 50 C70 60 65 72 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
           strokeDasharray={petalDash}
           strokeDashoffset={petalDash * (1 - petal1P)}
           style={{ transition: tr }}
         />
-        {/* Blütenblatt 2 */}
         <path d="M60 90 C76 80 88 74 93 63 C80 58 70 68 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
           strokeDasharray={petalDash}
           strokeDashoffset={petalDash * (1 - petal2P)}
           style={{ transition: tr }}
         />
-        {/* Blütenblatt 3 */}
         <path d="M60 90 C78 92 90 100 91 112 C78 113 67 103 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
           strokeDasharray={petalDash}
           strokeDashoffset={petalDash * (1 - petal3P)}
           style={{ transition: tr }}
         />
-        {/* Blütenblatt 4 */}
         <path d="M60 90 C42 92 30 100 29 112 C42 113 53 103 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
           strokeDasharray={petalDash}
           strokeDashoffset={petalDash * (1 - petal4P)}
           style={{ transition: tr }}
         />
-        {/* Blütenblatt 5 */}
         <path d="M60 90 C44 80 32 74 27 63 C40 58 50 68 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
           strokeDasharray={petalDash}
           strokeDashoffset={petalDash * (1 - petal5P)}
           style={{ transition: tr }}
-        />
-
-        {/* Blütenmitte */}
-        <circle
-          cx="60" cy="90"
-          r={8 * centerP}
-          fill="#E10019"
-          opacity={centerP}
-          style={{ transition: "r 0.8s ease, opacity 0.8s ease" }}
         />
       </svg>
 

@@ -122,11 +122,11 @@ function toRosePhase(p: FilePhase): RosePhase {
 function computeFlowerProgress(phase: FilePhase, uploadProgress: number): number {
   switch (phase) {
     case "pending":      return 0;
-    case "uploading":    return uploadProgress * 0.25;  // 0–25
-    case "validating":   return 40;                      // Stiel + Blätter fertig, Knospe sichtbar
-    case "importing":    return 70;                      // Blüte halb geöffnet
+    case "uploading":    return uploadProgress * 0.25;  // 0–25: Stiel + Blätter wachsen
+    case "validating":   return 48;                      // Stiel + Blätter fertig, Mittelpunkt erscheint
+    case "importing":    return 70;                      // Blütenblätter halb geöffnet
     case "done":         return 100;                     // voll erblüht
-    case "error":        return 22;                      // Stiel fast fertig, keine Blüte
+    case "error":        return 20;                      // Stiel sichtbar, keine Blüte
     case "schema-error": return 0;
     default:             return 0;
   }
