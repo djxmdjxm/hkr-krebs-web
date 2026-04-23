@@ -16,6 +16,39 @@ type ImportWarning = {
   hinweis:    string;
 };
 
+function downloadImportCsv(
+  filename: string,
+  summary: ImportSummary | null,
+  warnings: ImportWarning[],
+) {
+  const header = ["Dateiname", "Status", "Warnungen", "Patienten", "Fälle", "Diagnosejahre", "Med. Alter"];
+  const s = summary;
+  const diagnosejahre = s?.min_diagnosis_year != null && s?.max_diagnosis_year != null
+    ? s.min_diagnosis_year === s.max_diagnosis_year
+      ? String(s.min_diagnosis_year)
+      : `${s.min_diagnosis_year}-${s.max_diagnosis_year}`
+    : "";
+  const row = [
+    filename,
+    "Erfolg",
+    warnings.length > 0 ? String(warnings.length) : "",
+    s?.patient_count != null ? String(s.patient_count) : "",
+    s?.tumor_count != null ? String(s.tumor_count) : "",
+    diagnosejahre,
+    s?.median_age != null ? String(s.median_age) : "",
+  ];
+  const csv = [header, row].map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `importbericht-${filename.replace(/\.xml$/i, "")}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function downloadWarningsCsv(warnings: ImportWarning[], filenameHint: string) {
   const header = ["Patient-ID", "Tumor-ID", "Feld", "Wert", "Kategorie", "Hinweis"];
   const rows = warnings.map(w => [w.patient_id, w.tumor_id, w.feld, w.wert, w.kategorie, w.hinweis]);
@@ -469,11 +502,25 @@ export default function UploadSection() {
             <span style={{ fontSize: "1.2em" }}>&#x1F4CA;</span>
             Daten in R-Umgebung analysieren
           </a>
-          <button onClick={handleReset}
-            className="w-full px-6 py-2 rounded text-sm font-semibold border"
-            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent" }}>
-            Weitere Datei importieren
-          </button>
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => downloadImportCsv(selectedFile?.name ?? "import", importSummary, importWarnings)}
+              className="flex-1 py-2.5 rounded text-sm font-semibold border"
+              style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px" }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#F0F4FF"; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+            >
+              &#x2B07; Importbericht CSV
+            </button>
+            <button onClick={handleReset}
+              className="flex-1 py-2.5 rounded text-sm font-semibold border"
+              style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px" }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#F0F4FF"; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+            >
+              Weitere Datei importieren
+            </button>
+          </div>
         </div>
       )}
 
