@@ -95,42 +95,42 @@ export default function RoseProgress({
         {/* Blütenmitte — erscheint am Ende der Validierung in voller Größe */}
         <circle
           cx="60" cy="90"
-          r={8}
+          r={centerP > 0 ? 8 : 0}
           fill="#E10019"
           opacity={centerP}
           style={{ transition: "opacity 0.6s ease" }}
         />
 
-        {/* Blütenblätter — öffnen sich gestaffelt während des Imports */}
+        {/* Blütenblätter — opacity=0 bis sie wachsen sollen, verhindert SVG-Flash beim Mounten */}
         <path d="M60 90 C55 72 50 60 60 50 C70 60 65 72 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
-          strokeDasharray={petalDash}
-          strokeDashoffset={petalDash * (1 - petal1P)}
-          style={{ transition: tr }}
+          strokeDasharray={petalDash} strokeDashoffset={petalDash * (1 - petal1P)}
+          opacity={petal1P > 0 ? 1 : 0}
+          style={{ transition: `${tr}, opacity 0.4s ease` }}
         />
         <path d="M60 90 C76 80 88 74 93 63 C80 58 70 68 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
-          strokeDasharray={petalDash}
-          strokeDashoffset={petalDash * (1 - petal2P)}
-          style={{ transition: tr }}
+          strokeDasharray={petalDash} strokeDashoffset={petalDash * (1 - petal2P)}
+          opacity={petal2P > 0 ? 1 : 0}
+          style={{ transition: `${tr}, opacity 0.4s ease` }}
         />
         <path d="M60 90 C78 92 90 100 91 112 C78 113 67 103 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
-          strokeDasharray={petalDash}
-          strokeDashoffset={petalDash * (1 - petal3P)}
-          style={{ transition: tr }}
+          strokeDasharray={petalDash} strokeDashoffset={petalDash * (1 - petal3P)}
+          opacity={petal3P > 0 ? 1 : 0}
+          style={{ transition: `${tr}, opacity 0.4s ease` }}
         />
         <path d="M60 90 C42 92 30 100 29 112 C42 113 53 103 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
-          strokeDasharray={petalDash}
-          strokeDashoffset={petalDash * (1 - petal4P)}
-          style={{ transition: tr }}
+          strokeDasharray={petalDash} strokeDashoffset={petalDash * (1 - petal4P)}
+          opacity={petal4P > 0 ? 1 : 0}
+          style={{ transition: `${tr}, opacity 0.4s ease` }}
         />
         <path d="M60 90 C44 80 32 74 27 63 C40 58 50 68 60 90"
           stroke="#E10019" strokeWidth="2.5" strokeLinecap="round" fill="none"
-          strokeDasharray={petalDash}
-          strokeDashoffset={petalDash * (1 - petal5P)}
-          style={{ transition: tr }}
+          strokeDasharray={petalDash} strokeDashoffset={petalDash * (1 - petal5P)}
+          opacity={petal5P > 0 ? 1 : 0}
+          style={{ transition: `${tr}, opacity 0.4s ease` }}
         />
       </svg>
 
