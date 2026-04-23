@@ -126,18 +126,76 @@ function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed
     case "pending":      return 0;
     case "uploading":    return uploadProgress * 0.25;            // 0–25 mit Upload-Fortschritt
     case "validating": {
-      const t = Math.min(1, elapsed / 10000);                     // 25→58 über ~10s
-      return 25 + t * 33;
+      const t = Math.min(1, elapsed / 10000);                     // 25→70 über ~10s (Blütenblätter öffnen sich)
+      return 25 + t * 45;
     }
     case "importing": {
-      const t = Math.min(1, elapsed / 240000);                    // 58→88 über ~4min
-      return 58 + t * 30;
+      const t = Math.min(1, elapsed / 240000);                    // 70→92 über ~4min (voll erblüht)
+      return 70 + t * 22;
     }
     case "done":         return 100;
     case "error":        return 20;
     case "schema-error": return 0;
     default:             return 0;
   }
+}
+
+// ---- Rose item — MUSS außerhalb der Komponente sein (stabile Typreferenz verhindert Canvas-Reset) ----
+
+interface RoseItemProps {
+  item: FileItem;
+  roseSize: number;
+}
+
+function RoseItem({ item, roseSize }: RoseItemProps) {
+  const elapsed = Date.now() - item.phaseEnteredAt;
+  const showOverlay = item.phase === "done" || item.phase === "error" || item.phase === "schema-error";
+  const overlayIcon = item.phase === "done" ? "✓" : "✗";
+  const overlayColor = item.phase === "done" ? "#16A34A" : "#E10019";
+
+  const roseEl = (
+    <FlowerProgress
+      variant={item.variant}
+      progress={computeFlowerProgress(item.phase, item.uploadProgress, elapsed)}
+      phase={toFlowerPhase(item.phase)}
+      size={roseSize}
+      showLabel={false}
+    />
+  );
+
+  let wrapper: React.ReactNode;
+  if (item.phase === "pending") {
+    wrapper = <div style={{ opacity: 0.25, filter: "grayscale(1)" }}>{roseEl}</div>;
+  } else if (item.phase === "schema-error") {
+    wrapper = (
+      <div style={{ position: "relative", opacity: 0.5, filter: "grayscale(1)" }}>
+        {roseEl}
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontSize: `${Math.max(12, roseSize * 28)}px`, color: "#F0B429", fontWeight: "bold" }}>!</span>
+        </div>
+      </div>
+    );
+  } else if (showOverlay && roseSize < 0.5) {
+    wrapper = (
+      <div style={{ position: "relative" }}>
+        {roseEl}
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontSize: `${Math.max(10, roseSize * 24)}px`, color: overlayColor, fontWeight: "bold" }}>{overlayIcon}</span>
+        </div>
+      </div>
+    );
+  } else {
+    wrapper = roseEl;
+  }
+
+  return (
+    <div
+      title={item.file.name}
+      style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", cursor: "default" }}
+    >
+      {wrapper}
+    </div>
+  );
 }
 
 // ---- Component ------------------------------------------------------------
@@ -153,7 +211,7 @@ export default function BulkUploadSection() {
   const activeCountRef = useRef(0);
   const uploadQueueRef = useRef<QueueEntry[]>([]);
   const fileInputRef   = useRef<HTMLInputElement | null>(null);
-  const [animTick, setAnimTick] = useState(0);
+  const [, setAnimTick] = useState(0);
 
   useEffect(() => { fileItemsRef.current = fileItems; }, [fileItems]);
 
@@ -466,61 +524,6 @@ export default function BulkUploadSection() {
     return <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ backgroundColor: "#FFF8E1", color: "#7A4100", border: "1px solid #F0B429" }}>Kein Schema</span>;
   }
 
-  // ---- Rose item wrapper ---------------------------------------------------
-
-  function RoseItem({ item }: { item: FileItem }) {
-    const showOverlay = item.phase === "done" || item.phase === "error" || item.phase === "schema-error";
-    const overlayIcon = item.phase === "done" ? "✓" : "✗";
-    const overlayColor = item.phase === "done" ? "#16A34A" : "#E10019";
-    // animTick wird hier referenziert damit der Eltern-Rerender auch RoseItem neu rendert
-    const elapsed = Date.now() - item.phaseEnteredAt + (animTick * 0);
-
-    const roseEl = (
-      <FlowerProgress
-        variant={item.variant}
-        progress={computeFlowerProgress(item.phase, item.uploadProgress, elapsed)}
-        phase={toFlowerPhase(item.phase)}
-        size={roseSize}
-        showLabel={false}
-      />
-    );
-
-    let wrapper: React.ReactNode;
-
-    if (item.phase === "pending") {
-      wrapper = <div style={{ opacity: 0.25, filter: "grayscale(1)" }}>{roseEl}</div>;
-    } else if (item.phase === "schema-error") {
-      wrapper = (
-        <div style={{ position: "relative", opacity: 0.5, filter: "grayscale(1)" }}>
-          {roseEl}
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: `${Math.max(12, roseSize * 28)}px`, color: "#F0B429", fontWeight: "bold" }}>!</span>
-          </div>
-        </div>
-      );
-    } else if (showOverlay && roseSize < 0.5) {
-      wrapper = (
-        <div style={{ position: "relative" }}>
-          {roseEl}
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: `${Math.max(10, roseSize * 24)}px`, color: overlayColor, fontWeight: "bold" }}>{overlayIcon}</span>
-          </div>
-        </div>
-      );
-    } else {
-      wrapper = roseEl;
-    }
-
-    return (
-      <div
-        title={item.file.name}
-        style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", cursor: "default" }}
-      >
-        {wrapper}
-      </div>
-    );
-  }
-
   // ---- Render: Selection phase ---------------------------------------------
 
   if (uiPhase === "selection") {
@@ -634,7 +637,7 @@ export default function BulkUploadSection() {
           {/* Rose garden */}
           <div className="flex flex-wrap justify-center gap-2 mb-4">
             {fileItems.map(item => (
-              <RoseItem key={item.localId} item={item} />
+              <RoseItem key={item.localId} item={item} roseSize={roseSize} />
             ))}
           </div>
 
@@ -688,7 +691,7 @@ export default function BulkUploadSection() {
         {/* Mini rose garden */}
         <div className="flex flex-wrap justify-center gap-1 mb-6">
           {fileItems.map(item => (
-            <RoseItem key={item.localId} item={item} />
+            <RoseItem key={item.localId} item={item} roseSize={roseSize} />
           ))}
         </div>
 

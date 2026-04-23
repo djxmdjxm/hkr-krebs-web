@@ -146,11 +146,11 @@ export default function UploadSection() {
     }
     if (uploadState === "validating") {
       flowerTimerRef.current = setInterval(() => {
-        setFlowerProgress(p => Math.min(50, p + 1.5625)); // ~16 Ticks × 1.5625 = 25 Punkte
+        setFlowerProgress(p => Math.min(70, p + 2.8125)); // 25→70 in ~8s, Blütenblätter öffnen sich
       }, 500);
     } else if (uploadState === "importing") {
       flowerTimerRef.current = setInterval(() => {
-        setFlowerProgress(p => Math.min(88, p + 0.079)); // ~480 Ticks × 0.079 = 38 Punkte ≈ 4min
+        setFlowerProgress(p => Math.min(92, p + 0.046));  // 70→92 in ~4min, voll erblüht
       }, 500);
     } else if (uploadState === "done") {
       setFlowerProgress(100);
