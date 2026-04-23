@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import RoseProgress from "./RoseProgress";
+import AnchorProgress from "./AnchorProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 export default function Showcase() {
@@ -14,7 +14,7 @@ export default function Showcase() {
     >
       {/* Rose */}
       <div className="mb-6">
-        <RoseProgress progress={100} phase="done" showLabel={false} size={1.2} />
+        <AnchorProgress progress={100} phase="done" showLabel={false} size={1.2} />
       </div>
 
       {/* Titel */}

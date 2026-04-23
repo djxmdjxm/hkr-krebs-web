@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, DragEvent, ChangeEvent } from "react";
 import ProcessStepper from "./ProcessStepper";
-import RoseProgress, { RosePhase } from "./RoseProgress";
+import AnchorProgress, { AnchorPhase } from "./AnchorProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 type UploadState = "idle" | "uploading" | "validating" | "importing" | "done" | "error";
@@ -299,7 +299,7 @@ export default function UploadSection() {
     uploadState === "error"      ? errorStep : 1;
 
   // Rose-Phase
-  const rosePhase: RosePhase =
+  const rosePhase: AnchorPhase =
     uploadState === "validating" ? "validating" :
     uploadState === "importing"  ? "importing"  :
     uploadState === "done"       ? "done"       : "uploading";
@@ -394,7 +394,7 @@ export default function UploadSection() {
       {/* Rose — 3 Etappen */}
       {showRose && uploadState !== "done" && (
         <div className="max-w-sm mx-auto text-center">
-          <RoseProgress
+          <AnchorProgress
             progress={flowerProgress}
             phase={rosePhase}
             uploadedMB={uploadedMB}
@@ -407,7 +407,7 @@ export default function UploadSection() {
       {uploadState === "done" && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <RoseProgress progress={100} phase="done" />
+            <AnchorProgress progress={100} phase="done" />
             <h2 className="text-2xl font-bold mt-6 mb-1" style={{ color: "#003063" }}>Importbericht</h2>
             <p className="text-sm" style={{ color: "#505050" }}>
               Die Datei wurde erfolgreich validiert und importiert.

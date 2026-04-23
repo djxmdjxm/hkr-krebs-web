@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from "react";
 import Link from "next/link";
-import RoseProgress, { RosePhase } from "./RoseProgress";
+import AnchorProgress, { AnchorPhase } from "./AnchorProgress";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 // ---- Types ----------------------------------------------------------------
@@ -108,9 +108,9 @@ function calcRoseSize(count: number): number {
   return Math.min(1.0, Math.max(0.2, (800 / count) / 140));
 }
 
-// ---- Phase → RoseProgress phase mapping ----------------------------------
+// ---- Phase → AnchorProgress phase mapping ----------------------------------
 
-function toRosePhase(p: FilePhase): RosePhase {
+function toRosePhase(p: FilePhase): AnchorPhase {
   if (p === "validating") return "validating";
   if (p === "importing")  return "importing";
   if (p === "done")       return "done";
@@ -455,7 +455,7 @@ export default function BulkUploadSection() {
     const overlayColor = item.phase === "done" ? "#16A34A" : "#E10019";
 
     const roseEl = (
-      <RoseProgress
+      <AnchorProgress
         progress={computeFlowerProgress(item.phase, item.uploadProgress)}
         phase={toRosePhase(item.phase)}
         size={roseSize}
