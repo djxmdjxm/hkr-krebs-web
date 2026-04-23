@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from "react";
 import Link from "next/link";
-import FlowerProgress, { FlowerPhase, FlowerVariant, variantFromString } from "./FlowerProgress";
+import FlowerProgress, { FlowerPhase, FlowerVariant } from "./FlowerProgress";
 import ProcessStepper from "./ProcessStepper";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
@@ -104,12 +104,28 @@ function downloadWarningsCsv(warnings: ImportWarning[], filenameHint: string) {
   URL.revokeObjectURL(url);
 }
 
-// ---- Rose garden sizing ---------------------------------------------------
+// ---- Rose garden sizing & layout ------------------------------------------
 
 function calcRoseSize(count: number): number {
   if (count <= 0) return 1.0;
   return Math.min(1.0, Math.max(0.2, (800 / count) / 140));
 }
+
+function calcColumns(count: number): number {
+  if (count <= 3)  return count;  // 1→1, 2→2, 3→3 (single row)
+  if (count <= 6)  return 3;      // 4→3+1, 5→3+2, 6→3+3
+  if (count <= 8)  return 4;      // 7→4+3, 8→4+4
+  if (count <= 9)  return 3;      // 9→3+3+3
+  if (count <= 10) return 5;      // 10→5+5
+  if (count <= 12) return 4;      // 11→4+4+3, 12→4+4+4
+  if (count <= 15) return 5;      // 13→5+5+3, 15→5+5+5
+  if (count <= 16) return 4;      // 16→4×4
+  if (count <= 20) return 5;      // 17→5+5+5+2 … 20→5×4
+  return 6;                       // 21-30 → 6 Spalten
+}
+
+// Cycling-Variante: Position 0=rose, 1=sunflower, 2=daisy, 3=tulip, 4=cherry
+const FLOWER_CYCLE: FlowerVariant[] = ["rose", "sunflower", "daisy", "tulip", "cherry"];
 
 // ---- Phase → FlowerProgress phase mapping ----------------------------------
 
@@ -373,14 +389,14 @@ export default function BulkUploadSection() {
     }
     setOverLimit(false);
 
-    const newItems: FileItem[] = files.map(file => ({
+    const newItems: FileItem[] = files.map((file, idx) => ({
       localId: generateId(),
       file,
       schema: null,
       uploadProgress: 0,
       phase: "pending" as FilePhase,
       phaseEnteredAt: Date.now(),
-      variant: variantFromString(file.name + String(file.size)),
+      variant: FLOWER_CYCLE[(current.length + idx) % FLOWER_CYCLE.length],
     }));
 
     setFileItems(prev => [...prev, ...newItems]);
@@ -648,7 +664,10 @@ export default function BulkUploadSection() {
           <p className="text-center text-sm mb-8" style={{ color: "#505050" }}>{progressText}</p>
 
           {/* Rose garden */}
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
+          <div
+            className="mb-4"
+            style={{ display: "grid", gridTemplateColumns: `repeat(${calcColumns(fileItems.length)}, auto)`, justifyContent: "center", gap: "8px" }}
+          >
             {fileItems.map(item => (
               <RoseItem key={item.localId} item={item} roseSize={roseSize} />
             ))}
@@ -698,7 +717,10 @@ export default function BulkUploadSection() {
         </div>
 
         {/* Mini rose garden */}
-        <div className="flex flex-wrap justify-center gap-1 mb-6">
+        <div
+          className="mb-6"
+          style={{ display: "grid", gridTemplateColumns: `repeat(${calcColumns(fileItems.length)}, auto)`, justifyContent: "center", gap: "4px" }}
+        >
           {fileItems.map(item => (
             <RoseItem key={item.localId} item={item} roseSize={roseSize} />
           ))}
