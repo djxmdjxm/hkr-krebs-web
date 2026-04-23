@@ -41,6 +41,7 @@ type FileItem = {
   serverUid?: string;
   uploadProgress: number;
   phase: FilePhase;
+  phaseEnteredAt: number;
   variant: FlowerVariant;
   summary?: ImportSummary;
   errorMsg?: string;
@@ -118,16 +119,22 @@ function toFlowerPhase(p: FilePhase): FlowerPhase {
   return "uploading";
 }
 
-// ---- Blumen-Fortschritt aus Phase ableiten (ohne Timer, rein deterministisch) ----
+// ---- Blumen-Fortschritt: Upload deterministisch, Validierung/Import zeitbasiert ----
 
-function computeFlowerProgress(phase: FilePhase, uploadProgress: number): number {
+function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed: number): number {
   switch (phase) {
     case "pending":      return 0;
-    case "uploading":    return uploadProgress * 0.25;  // 0–25: Stiel + Blätter wachsen
-    case "validating":   return 48;                      // Stiel + Blätter fertig, Mittelpunkt erscheint
-    case "importing":    return 70;                      // Blütenblätter halb geöffnet
-    case "done":         return 100;                     // voll erblüht
-    case "error":        return 20;                      // Stiel sichtbar, keine Blüte
+    case "uploading":    return uploadProgress * 0.25;            // 0–25 mit Upload-Fortschritt
+    case "validating": {
+      const t = Math.min(1, elapsed / 10000);                     // 25→58 über ~10s
+      return 25 + t * 33;
+    }
+    case "importing": {
+      const t = Math.min(1, elapsed / 240000);                    // 58→88 über ~4min
+      return 58 + t * 30;
+    }
+    case "done":         return 100;
+    case "error":        return 20;
     case "schema-error": return 0;
     default:             return 0;
   }
@@ -146,14 +153,26 @@ export default function BulkUploadSection() {
   const activeCountRef = useRef(0);
   const uploadQueueRef = useRef<QueueEntry[]>([]);
   const fileInputRef   = useRef<HTMLInputElement | null>(null);
+  const [animTick, setAnimTick] = useState(0);
 
   useEffect(() => { fileItemsRef.current = fileItems; }, [fileItems]);
+
+  // Animationstakt: 150ms-Ticks während des Uploads damit Blumen zeitbasiert wachsen
+  useEffect(() => {
+    if (uiPhase !== "uploading") return;
+    const id = setInterval(() => setAnimTick(t => t + 1), 150);
+    return () => clearInterval(id);
+  }, [uiPhase]);
 
   // ---- State helpers -------------------------------------------------------
 
   const updateFileItem = useCallback((localId: string, updates: Partial<FileItem>) => {
     setFileItems(prev => prev.map(item =>
-      item.localId === localId ? { ...item, ...updates } : item
+      item.localId === localId ? {
+        ...item,
+        ...updates,
+        ...(updates.phase !== undefined && updates.phase !== item.phase ? { phaseEnteredAt: Date.now() } : {}),
+      } : item
     ));
   }, []);
 
@@ -301,6 +320,7 @@ export default function BulkUploadSection() {
       schema: null,
       uploadProgress: 0,
       phase: "pending" as FilePhase,
+      phaseEnteredAt: Date.now(),
       variant: variantFromString(file.name + String(file.size)),
     }));
 
@@ -452,11 +472,13 @@ export default function BulkUploadSection() {
     const showOverlay = item.phase === "done" || item.phase === "error" || item.phase === "schema-error";
     const overlayIcon = item.phase === "done" ? "✓" : "✗";
     const overlayColor = item.phase === "done" ? "#16A34A" : "#E10019";
+    // animTick wird hier referenziert damit der Eltern-Rerender auch RoseItem neu rendert
+    const elapsed = Date.now() - item.phaseEnteredAt + (animTick * 0);
 
     const roseEl = (
       <FlowerProgress
         variant={item.variant}
-        progress={computeFlowerProgress(item.phase, item.uploadProgress)}
+        progress={computeFlowerProgress(item.phase, item.uploadProgress, elapsed)}
         phase={toFlowerPhase(item.phase)}
         size={roseSize}
         showLabel={false}
