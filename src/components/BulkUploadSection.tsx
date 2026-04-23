@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from "react";
 import Link from "next/link";
 import FlowerProgress, { FlowerPhase, FlowerVariant, variantFromString } from "./FlowerProgress";
+import ProcessStepper from "./ProcessStepper";
 import { useCodeServerUrl } from "@/lib/codeServerUrl";
 
 // ---- Types ----------------------------------------------------------------
@@ -123,7 +124,7 @@ function toFlowerPhase(p: FilePhase): FlowerPhase {
 
 function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed: number): number {
   switch (phase) {
-    case "pending":      return 0;
+    case "pending":      return 6;   // zarter Keimling als Platzhalter
     case "uploading":    return uploadProgress * 0.25;            // 0–25 mit Upload-Fortschritt
     case "validating": {
       const t = Math.min(1, elapsed / 10000);                     // 25→70 über ~10s (Blütenblätter öffnen sich)
@@ -508,6 +509,9 @@ export default function BulkUploadSection() {
   const doneCount = fileItems.filter(f => f.phase === "done").length;
   const errorCount = fileItems.filter(f => f.phase === "error" || f.phase === "schema-error").length;
   const totalCount = fileItems.length;
+  const processingCount = fileItems.filter(f =>
+    f.phase === "uploading" || f.phase === "validating" || f.phase === "importing"
+  ).length;
 
   // ---- Schema badge helper -------------------------------------------------
 
@@ -624,11 +628,20 @@ export default function BulkUploadSection() {
   if (uiPhase === "uploading") {
     const progressText = doneCount > 0
       ? `${doneCount} von ${totalCount} abgeschlossen`
-      : "Import läuft…";
+      : processingCount > 0
+      ? `${processingCount} von ${totalCount} ${processingCount === 1 ? "wird" : "werden"} verarbeitet`
+      : "Starte…";
+
+    const bulkStep = fileItems.some(f => f.phase === "importing" || f.phase === "done") ? 3
+      : fileItems.some(f => f.phase === "validating") ? 2
+      : 1;
 
     return (
       <section className="py-10 px-4">
         <div className="max-w-3xl mx-auto">
+          <div className="mb-6">
+            <ProcessStepper currentStep={bulkStep} />
+          </div>
           <h2 className="text-xl font-bold text-center mb-1" style={{ color: "#003063" }}>
             Massenimport läuft
           </h2>
@@ -640,13 +653,6 @@ export default function BulkUploadSection() {
               <RoseItem key={item.localId} item={item} roseSize={roseSize} />
             ))}
           </div>
-
-          {/* Mini legend */}
-          {doneCount > 0 && (
-            <p className="text-center text-sm mt-4" style={{ color: "#16A34A" }}>
-              {doneCount} von {totalCount} abgeschlossen
-            </p>
-          )}
         </div>
       </section>
     );
@@ -679,6 +685,9 @@ export default function BulkUploadSection() {
   return (
     <section className="py-10 px-4">
       <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <ProcessStepper currentStep={4} />
+        </div>
         {/* Summary header */}
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold" style={{ color: "#003063" }}>Import abgeschlossen</h2>
