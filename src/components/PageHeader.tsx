@@ -11,7 +11,7 @@ export default function PageHeader() {
   const links = [
     { label: "Upload", href: "/registry" },
     { label: "Dokumentation", href: "/schema" },
-    { label: "About", href: "/about" },
+    { label: "Über", href: "/about" },
   ];
 
   return (

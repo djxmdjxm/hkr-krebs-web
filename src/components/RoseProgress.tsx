@@ -92,13 +92,13 @@ export default function RoseProgress({
           style={{ transition: tr }}
         />
 
-        {/* Blütenmitte — erscheint am Ende der Validierung, bevor die Blütenblätter kommen */}
+        {/* Blütenmitte — erscheint am Ende der Validierung in voller Größe */}
         <circle
           cx="60" cy="90"
-          r={8 * centerP}
+          r={8}
           fill="#E10019"
           opacity={centerP}
-          style={{ transition: "r 0.6s ease, opacity 0.6s ease" }}
+          style={{ transition: "opacity 0.6s ease" }}
         />
 
         {/* Blütenblätter — öffnen sich gestaffelt während des Imports */}
