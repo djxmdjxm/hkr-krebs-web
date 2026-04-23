@@ -714,83 +714,99 @@ export default function BulkUploadSection() {
           </div>
         )}
 
-        {/* Log table */}
-        <div className="rounded-lg overflow-hidden mb-4" style={{ border: "1px solid #D8D8D8", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ backgroundColor: "#F2F5F7", borderBottom: "1px solid #D8D8D8" }}>
-                <th className="text-left px-4 py-2 font-semibold" style={{ color: "#003063" }}>Dateiname</th>
-                <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Status</th>
-                <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Patienten</th>
-                <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Fälle</th>
-                <th className="text-center px-3 py-2 font-semibold" style={{ color: "#003063" }}>Diagnosejahre</th>
-                <th className="text-left px-3 py-2 font-semibold" style={{ color: "#003063" }}>Hinweise</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fileItems.map((item, i) => {
-                const isError = item.phase !== "done";
-                const s = item.summary;
-                const diagnosejahre = s?.min_diagnosis_year != null && s?.max_diagnosis_year != null
-                  ? s.min_diagnosis_year === s.max_diagnosis_year
-                    ? String(s.min_diagnosis_year)
-                    : `${s.min_diagnosis_year}–${s.max_diagnosis_year}`
-                  : "—";
+        {/* Per-Datei Ergebnisse — gleicher Stil wie Einzelimport */}
+        <div className="space-y-2 mb-6">
+          {fileItems.map(item => {
+            const s = item.summary;
+            const diagnosejahre = s?.min_diagnosis_year != null && s?.max_diagnosis_year != null
+              ? s.min_diagnosis_year === s.max_diagnosis_year
+                ? String(s.min_diagnosis_year)
+                : `${s.min_diagnosis_year}–${s.max_diagnosis_year}`
+              : null;
+            const kpiText = s
+              ? [
+                  s.patient_count != null ? `${s.patient_count.toLocaleString("de-DE")} Pat.` : null,
+                  s.tumor_count != null ? `${s.tumor_count.toLocaleString("de-DE")} Fälle` : null,
+                  diagnosejahre,
+                ].filter(Boolean).join(" · ")
+              : null;
 
-                return (
-                  <tr key={item.localId}
-                    style={{
-                      backgroundColor: isError ? "#FFF5F5" : i % 2 === 0 ? "#FFFFFF" : "#FAFAFA",
-                      borderBottom: "1px solid #EEEEEE",
-                    }}
-                  >
-                    <td className="px-4 py-2 font-medium truncate max-w-xs" style={{ color: isError ? "#E10019" : "#003063" }} title={item.file.name}>
+            if (item.phase === "done" && item.warnings?.length) {
+              return (
+                <div key={item.localId} className="rounded-lg px-4 py-3 flex items-center justify-between gap-3"
+                  style={{ backgroundColor: "#FFF8E1", border: "1px solid #F0B429" }}>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: "#7A4100" }} title={item.file.name}>
                       {item.file.name}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {item.phase === "done" && !item.warnings?.length
-                        ? <span style={{ color: "#16A34A", fontWeight: 600 }}>✓ Erfolg</span>
-                        : item.phase === "done" && item.warnings?.length
-                          ? <span style={{ color: "#7A4100", fontWeight: 600 }}>⚠ {item.warnings.length} Warn.</span>
-                          : item.phase === "schema-error"
-                            ? <span style={{ color: "#7A4100", fontWeight: 600 }}>⚠ Schema</span>
-                            : <span style={{ color: "#E10019", fontWeight: 600 }}>✗ Fehler</span>
-                      }
-                    </td>
-                    <td className="px-3 py-2 text-center" style={{ color: "#003063" }}>
-                      {s?.patient_count?.toLocaleString("de-DE") ?? "—"}
-                    </td>
-                    <td className="px-3 py-2 text-center" style={{ color: "#003063" }}>
-                      {s?.tumor_count?.toLocaleString("de-DE") ?? "—"}
-                    </td>
-                    <td className="px-3 py-2 text-center" style={{ color: "#003063" }}>
-                      {diagnosejahre}
-                    </td>
-                    <td className="px-3 py-2 text-sm" style={{ color: "#505050" }}>
-                      {item.errorMsg ?? ""}
-                      {item.errorPath && (
-                        <div className="text-xs mt-0.5 font-mono break-all" style={{ color: "#909090" }}>
-                          {item.errorPath}
-                        </div>
-                      )}
-                      {item.warnings && item.warnings.length > 0 && (
-                        <button
-                          onClick={() => downloadWarningsCsv(item.warnings!, item.file.name)}
-                          className="mt-1 text-xs px-2 py-1 rounded border font-medium"
-                          style={{ borderColor: "#F0B429", color: "#7A4100", backgroundColor: "#FFF8E1" }}
-                        >
-                          &#x2B07; {item.warnings.length} Qualitätsprobleme (CSV)
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: "#7A4100" }}>
+                      &#9888; {item.warnings.length} Datenqualitätsprobleme — Datei wurde trotzdem vollständig importiert
+                      {kpiText && <span className="ml-2 opacity-70">· {kpiText}</span>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => downloadWarningsCsv(item.warnings!, item.file.name)}
+                    className="text-xs px-3 py-1.5 rounded border font-medium shrink-0"
+                    style={{ borderColor: "#F0B429", color: "#7A4100", backgroundColor: "#FFFDF0" }}
+                  >
+                    &#x2B07; Qualitätsbericht CSV
+                  </button>
+                </div>
+              );
+            }
+
+            if (item.phase === "done") {
+              return (
+                <div key={item.localId} className="rounded-lg px-4 py-2.5 flex items-center justify-between gap-3"
+                  style={{ backgroundColor: "#F0FFF4", border: "1px solid #22C55E" }}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span style={{ color: "#16A34A", fontWeight: 700 }}>&#10003;</span>
+                    <span className="text-sm font-medium truncate" style={{ color: "#166534" }} title={item.file.name}>
+                      {item.file.name}
+                    </span>
+                  </div>
+                  {kpiText && (
+                    <span className="text-xs shrink-0" style={{ color: "#166534" }}>{kpiText}</span>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div key={item.localId} className="rounded-lg px-4 py-3"
+                style={{ backgroundColor: "#FFF0F0", border: "1px solid #E10019" }}>
+                <div className="flex items-center gap-2">
+                  <span style={{ color: "#E10019", fontWeight: 700 }}>&#10007;</span>
+                  <span className="text-sm font-medium truncate" style={{ color: "#E10019" }} title={item.file.name}>
+                    {item.file.name}
+                  </span>
+                </div>
+                {item.errorMsg && (
+                  <div className="text-xs mt-1 ml-5" style={{ color: "#505050" }}>{item.errorMsg}</div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Actions */}
+        {/* R-Umgebung — gleicher Stil wie Einzelimport */}
+        <p className="text-sm text-center mb-3" style={{ color: "#505050" }}>
+          Die importierten Daten stehen jetzt in der R-Umgebung bereit.
+        </p>
+        <Link
+          href={codeServerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded text-white text-sm font-bold mb-3 no-underline"
+          style={{ backgroundColor: "#003063" }}
+          onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#002853"; }}
+          onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#003063"; }}
+        >
+          <span style={{ fontSize: "1.2em" }}>&#x1F4CA;</span>
+          Daten in R-Umgebung analysieren
+        </Link>
+
+        {/* Sekundäre Aktionen */}
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleCsvDownload}
@@ -812,23 +828,12 @@ export default function BulkUploadSection() {
               &#x2B07; Qualitätsbericht gesamt
             </button>
           )}
-          <Link
-            href={codeServerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded text-sm font-semibold border text-center no-underline"
-            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center" }}
-            onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#F0F4FF"; }}
-            onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
-          >
-            R-Umgebung öffnen
-          </Link>
           <button
             onClick={handleReset}
-            className="flex-1 py-2.5 rounded text-white text-sm font-semibold"
-            style={{ backgroundColor: "#003063", minWidth: "140px" }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#002853"; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#003063"; }}
+            className="flex-1 py-2.5 rounded text-sm font-semibold border"
+            style={{ color: "#003063", borderColor: "#003063", backgroundColor: "transparent", minWidth: "140px" }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#F0F4FF"; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
           >
             Weiteren Import starten
           </button>
