@@ -600,9 +600,9 @@ export default function BulkUploadSection() {
   // ---- Render: Uploading phase (Rose garden) -------------------------------
 
   if (uiPhase === "uploading") {
-    const progressText = processingCount > 0
-      ? `${processingCount} von ${totalCount} werden verarbeitet…`
-      : "Abschluss läuft…";
+    const progressText = doneCount > 0
+      ? `${doneCount} von ${totalCount} abgeschlossen`
+      : "Import läuft…";
 
     return (
       <section className="py-10 px-4">
@@ -659,7 +659,6 @@ export default function BulkUploadSection() {
       <div className="max-w-3xl mx-auto">
         {/* Summary header */}
         <div className="text-center mb-6">
-          <div className="text-3xl mb-2">{errorCount === 0 ? "✅" : doneCount === 0 ? "❌" : "⚠️"}</div>
           <h2 className="text-xl font-bold" style={{ color: "#003063" }}>Import abgeschlossen</h2>
           <p className="text-sm mt-1" style={{ color: "#505050" }}>
             <strong style={{ color: "#16A34A" }}>{doneCount}</strong> von <strong>{totalCount}</strong> Dateien erfolgreich importiert
