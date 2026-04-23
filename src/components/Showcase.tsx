@@ -12,7 +12,7 @@ export default function Showcase() {
   return (
     <section className="bg-gray-50 py-16 px-4 sm:px-8">
       <h2 className="text-3xl text-slate-700 sm:text-4xl font-semibold text-center mb-8">
-        Integrate in under a minute
+        In Sekunden einsatzbereit
       </h2>
 
       <div className="flex justify-center gap-6 mb-12 text-sm sm:text-base">
@@ -39,15 +39,15 @@ export default function Showcase() {
         <div className="flex-1 space-y-4 mb-6 md:mb-0">
           <h3 className="text-xl font-semibold">{activeTab}</h3>
           <p className="text-gray-600">
-            Access high-quality, structured oncology data in seconds with{" "}
+            Greifen Sie in Sekunden auf hochwertige, strukturierte Onkologiedaten zu – mit{" "}
             {activeTab}.
           </p>
 
           <ul className="list-disc pl-5 text-sm text-gray-800 space-y-1 mt-4">
-            <li>Fast JSON & Parquet APIs</li>
-            <li>Secure, token-based access</li>
-            <li>Field-level access control</li>
-            <li>Privacy-first architecture</li>
+            <li>Schnelle JSON- &amp; Parquet-APIs</li>
+            <li>Sicherer, tokenbasierter Zugriff</li>
+            <li>Feldbezogene Zugriffskontrolle</li>
+            <li>Datenschutz-zentrierte Architektur</li>
           </ul>
         </div>
 
