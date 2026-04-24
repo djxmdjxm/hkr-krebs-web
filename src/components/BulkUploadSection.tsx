@@ -522,7 +522,8 @@ export default function BulkUploadSection() {
 
   const hasValidFiles = fileItems.some(f => f.schema?.status === "known");
   const roseSize = calcRoseSize(fileItems.length);
-  const doneCount = fileItems.filter(f => f.phase === "done").length;
+  const warnCount  = fileItems.filter(f => f.phase === "done" && (f.warnings?.length ?? 0) > 0).length;
+  const doneCount  = fileItems.filter(f => f.phase === "done").length - warnCount;
   const errorCount = fileItems.filter(f => f.phase === "error" || f.phase === "schema-error").length;
   const totalCount = fileItems.length;
   const processingCount = fileItems.filter(f =>
@@ -711,8 +712,10 @@ export default function BulkUploadSection() {
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold" style={{ color: "#003063" }}>Import abgeschlossen</h2>
           <p className="text-sm mt-1" style={{ color: "#505050" }}>
-            <strong style={{ color: "#16A34A" }}>{doneCount}</strong> von <strong>{totalCount}</strong> Dateien erfolgreich importiert
-            {errorCount > 0 && <>, <strong style={{ color: "#E10019" }}>{errorCount}</strong> fehlgeschlagen</>}
+            {doneCount > 0 && <><strong style={{ color: "#16A34A" }}>{doneCount}</strong> erfolgreich</>}
+            {warnCount > 0 && <>{doneCount > 0 ? " · " : ""}<strong style={{ color: "#7A4100" }}>{warnCount}</strong> mit Qualitätshinweisen</>}
+            {errorCount > 0 && <>{(doneCount > 0 || warnCount > 0) ? " · " : ""}<strong style={{ color: "#E10019" }}>{errorCount}</strong> nicht importiert</>}
+            {" "}(von {totalCount})
           </p>
         </div>
 
