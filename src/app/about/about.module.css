@@ -263,6 +263,14 @@
   color: var(--color-text-primary);
 }
 
+.collabNote {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 1.25rem 0 0;
+  text-align: center;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;

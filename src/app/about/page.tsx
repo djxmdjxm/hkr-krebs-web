@@ -67,19 +67,6 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className={styles.featureCard}>
-          <div className={styles.featureIcon}>
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="3" width="14" height="10" rx="2" stroke="#005CA9" strokeWidth="1.5" fill="none" />
-              <path d="M5 8h6M5 10.5h4" stroke="#005CA9" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </div>
-          <p className={styles.featureTitle}>Kartendarstellung</p>
-          <p className={styles.featureDesc}>
-            Regionale Visualisierungen mit <code className={styles.codeInline}>karte_kreise.R</code> direkt
-            aus der Applikation heraus.
-          </p>
-        </div>
       </div>
 
       <p className={styles.sectionTitle}>Unterstützte Importformate</p>
@@ -154,8 +141,12 @@ export default function AboutPage() {
         </div>
       </div>
 
+      <p className={styles.collabNote}>
+        KIKA wurde in Kooperation mit der HAW Hamburg, Fachbereich Informatik, Leitung Prof. Kai von Luck entwickelt.
+      </p>
+
       <div className={styles.footer}>
-        <span className={styles.footerLeft}>© 2025 Hamburgisches Krebsregister · in Kooperation mit der HAW Hamburg</span>
+        <span className={styles.footerLeft}>© 2025 Hamburgisches Krebsregister</span>
         <span className={styles.footerBuild}>Build {BUILD_VERSION}</span>
       </div>
     </div>
