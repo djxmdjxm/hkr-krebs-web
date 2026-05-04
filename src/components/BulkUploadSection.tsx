@@ -591,8 +591,18 @@ export default function BulkUploadSection() {
           {/* File list */}
           {fileItems.length > 0 && (
             <div className="rounded-lg mb-4" style={{ backgroundColor: "#FFFFFF", border: "1px solid #D8D8D8", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wide border-b" style={{ color: "#505050", borderColor: "#D8D8D8" }}>
-                {fileItems.length} Datei{fileItems.length !== 1 ? "en" : ""} ausgewählt
+              <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "#D8D8D8" }}>
+                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#505050" }}>
+                  {fileItems.length} Datei{fileItems.length !== 1 ? "en" : ""} ausgewählt
+                </span>
+                <button
+                  onClick={handleReset}
+                  className="text-xs underline hover:no-underline"
+                  style={{ color: "#E10019" }}
+                  title="Alle Dateien aus der Liste entfernen"
+                >
+                  Alle entfernen
+                </button>
               </div>
               <ul className="divide-y" style={{ maxHeight: "320px", overflowY: "auto" }}>
                 {fileItems.map(item => (
