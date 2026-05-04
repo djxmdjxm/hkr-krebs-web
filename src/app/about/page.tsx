@@ -125,20 +125,6 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <p className={styles.sectionTitle}>Entwicklung &amp; Kooperation</p>
-      <div className={styles.collabBox}>
-        <div className={styles.collabIcon}>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9" cy="9" r="7" stroke="#005CA9" strokeWidth="1.5" fill="none" />
-            <path d="M6 9h6M9 6v6" stroke="#005CA9" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </div>
-        <p>
-          KIKA wurde in Kooperation mit der <strong>HAW Hamburg, Fachbereich Informatik</strong>,
-          unter der Leitung von <strong>Prof. Kai von Luck</strong> entwickelt.
-        </p>
-      </div>
-
       <p className={styles.sectionTitle}>Ansprechpartner</p>
       <div className={styles.contactGrid}>
         <div className={styles.contactCard}>
@@ -146,9 +132,7 @@ export default function AboutPage() {
             <div className={styles.avatar}>AS</div>
             <div>
               <p className={styles.contactName}>Dr. Annemarie Schultz</p>
-              <p className={styles.contactRole}>
-                Hamburgisches Krebsregister · Analyse &amp; Methodik
-              </p>
+              <p className={styles.contactRole}>Hamburgisches Krebsregister</p>
               <a href="mailto:annemarie.schultz@bwfg.hamburg.de" className={styles.contactEmail}>
                 annemarie.schultz@bwfg.hamburg.de
               </a>
@@ -162,13 +146,16 @@ export default function AboutPage() {
             <div>
               <p className={styles.contactName}>PD Dr. Frederik Peters</p>
               <p className={styles.contactRole}>Hamburgisches Krebsregister</p>
+              <a href="mailto:frederik.peters@bwfg.hamburg.de" className={styles.contactEmail}>
+                frederik.peters@bwfg.hamburg.de
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       <div className={styles.footer}>
-        <span className={styles.footerLeft}>© 2025 Hamburgisches Krebsregister</span>
+        <span className={styles.footerLeft}>© 2025 Hamburgisches Krebsregister · in Kooperation mit der HAW Hamburg</span>
         <span className={styles.footerBuild}>Build {BUILD_VERSION}</span>
       </div>
     </div>
