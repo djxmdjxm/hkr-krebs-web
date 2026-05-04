@@ -23,7 +23,7 @@ export default function PageHeader() {
       <Link href="/" className="flex items-center gap-3 no-underline">
         <span className="font-bold text-xl text-white tracking-wide">KIKA</span>
         <span className="text-xs font-light text-white opacity-70 hidden sm:block">
-          Hamburgisches Krebsregister
+          KI in der Krebsregister-Datenanalyse
         </span>
       </Link>
 
