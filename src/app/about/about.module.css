@@ -1,0 +1,289 @@
+/* About-Seite v2 — Hamburg CD, kompakt & strukturiert.
+   Mappt fehlende generische Farb-Variablen auf KIKA-Werte. */
+
+.about {
+  --hh-blau: #005CA9;
+  --hh-dunkelblau: #003063;
+  --hh-rot: #E10019;
+  --hh-grau: #E3E3E3;
+  --hh-dunkelgrau: #757575;
+
+  --color-text-primary: #003063;
+  --color-text-secondary: #505050;
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F2F5F7;
+  --color-border-tertiary: #D8D8D8;
+  --border-radius-lg: 8px;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  font-family: "Lato", system-ui, sans-serif;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+}
+
+.header {
+  border-left: 4px solid var(--hh-rot);
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.headerLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hh-dunkelgrau);
+  margin: 0 0 4px;
+}
+
+.headerTitle {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 4px;
+  color: var(--color-text-primary);
+}
+
+.headerSubtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.lead {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg);
+  border-left: 3px solid var(--hh-blau);
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hh-dunkelgrau);
+  margin: 0 0 0.75rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.featureCard {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.1rem;
+}
+
+.featureIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #E6F0F7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.featureIcon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.featureTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 4px;
+}
+
+.featureDesc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.formats {
+  margin-bottom: 2rem;
+}
+
+.formatRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.formatRow:last-child {
+  border-bottom: none;
+}
+
+.formatBadge {
+  font-size: 11px;
+  font-weight: 500;
+  background: #E6F0F7;
+  color: var(--hh-dunkelblau);
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.formatText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.securityBox {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-tertiary);
+  margin-bottom: 2rem;
+}
+
+.securityIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.securityBox p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.securityBox strong {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.contactCard {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+}
+
+.contactInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #E6F0F7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hh-dunkelblau);
+  flex-shrink: 0;
+}
+
+.contactName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 2px;
+}
+
+.contactRole {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin: 0 0 3px;
+  line-height: 1.4;
+}
+
+.contactEmail {
+  font-size: 11px;
+  color: var(--hh-blau);
+  margin: 0;
+  text-decoration: none;
+}
+
+.contactEmail:hover {
+  text-decoration: underline;
+}
+
+.collabBox {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-tertiary);
+  margin-bottom: 1.25rem;
+}
+
+.collabIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.collabBox p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.collabBox strong {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  margin-top: 2rem;
+}
+
+.footerLeft {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.footerBuild {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+.codeInline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}

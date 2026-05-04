@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import styles from "./about.module.css";
 
 export const metadata: Metadata = {
   title: "About – KIKA",
@@ -6,129 +7,170 @@ export const metadata: Metadata = {
 
 const BUILD_VERSION = process.env.BUILD_VERSION ?? "–";
 
-const FORMATS = [
-  { id: "oBDS 3.0.4_RKI", label: "oBDS 3.0.4_RKI", desc: "Onkologischer Basisdatensatz, RKI-Profil, Version 3.0.4" },
-  { id: "oBDS 3.0.0.8a_RKI", label: "oBDS 3.0.0.8a_RKI", desc: "Onkologischer Basisdatensatz, RKI-Profil, Version 3.0.0.8a" },
-];
-
-const STEPS = [
-  {
-    n: 1,
-    title: "XML prüfen",
-    text: "Stellen Sie sicher, dass Ihre Exportdatei dem oBDS-RKI-Format entspricht. Bei Upload-Fehlern zeigt KIKA den genauen XML-Pfad und die Abweichung an.",
-  },
-  {
-    n: 2,
-    title: "Daten hochladen",
-    text: 'Laden Sie eine oder mehrere XML-Dateien über die Upload-Seite hoch. Der Einzelimport eignet sich für Tests, der Massenimport für den regulären Datentransfer. Fehlertolerante Prüfung: Kleinere Abweichungen (z. B. ungültige Code-Werte) werden importiert und als Warnungen protokolliert.',
-  },
-  {
-    n: 3,
-    title: "In der R-Umgebung analysieren",
-    text: 'Öffnen Sie die R-Umgebung über den Button oben rechts. Die vorbereiteten Skripte (analyse.R, karte_kreise.R) greifen direkt auf die importierte Datenbank zu.',
-  },
-];
-
 export default function AboutPage() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10 space-y-10">
-      {/* Was ist KIKA */}
-      <section>
-        <h1 className="text-2xl font-bold mb-3" style={{ color: "#003063" }}>
-          Was ist KIKA?
-        </h1>
-        <p className="text-sm leading-relaxed" style={{ color: "#303030" }}>
-          KIKA (Krebsregister Import- und Karten-Applikation) ist eine webbasierte Plattform
-          des Hamburgischen Krebsregisters für den strukturierten Import und die explorative
-          Analyse onkologischer Meldedaten. Die Anwendung wird lokal in der gesicherten
-          Infrastruktur der Krebsregister betrieben — ein Internetzugang ist im laufenden
-          Betrieb nicht erforderlich.
-        </p>
-      </section>
+    <div className={styles.about}>
+      <div className={styles.header}>
+        <p className={styles.headerLabel}>Hamburgisches Krebsregister</p>
+        <h1 className={styles.headerTitle}>KIKA</h1>
+        <p className={styles.headerSubtitle}>Krebsregister Import- und Karten-Applikation</p>
+      </div>
 
-      {/* Unterstützte Formate */}
-      <section>
-        <h2 className="text-base font-semibold mb-3" style={{ color: "#003063" }}>
-          Unterstützte Importformate
-        </h2>
-        <div className="space-y-2">
-          {FORMATS.map((f) => (
-            <div
-              key={f.id}
-              className="flex items-start gap-3 rounded-lg px-4 py-3 text-sm"
-              style={{ backgroundColor: "#F2F5F7", borderLeft: "3px solid #003063" }}
-            >
-              <span className="font-mono font-semibold shrink-0" style={{ color: "#003063" }}>
-                {f.label}
-              </span>
-              <span style={{ color: "#505050" }}>{f.desc}</span>
+      <div className={styles.lead}>
+        KIKA ist die interne Analyseplattform des Hamburgischen Krebsregisters für den
+        strukturierten Import, die Qualitätsprüfung und die explorative Auswertung
+        onkologischer Meldedaten. Die Anwendung läuft vollständig innerhalb der gesicherten
+        Registerinfrastruktur — ein Internetzugang ist im Betrieb nicht erforderlich.
+      </div>
+
+      <p className={styles.sectionTitle}>Kernfunktionen</p>
+      <div className={styles.features}>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 3h10v2H3V3zm0 4h10v2H3V7zm0 4h6v2H3v-2z" fill="#005CA9" />
+            </svg>
+          </div>
+          <p className={styles.featureTitle}>XML-Import</p>
+          <p className={styles.featureDesc}>
+            Einzel- und Massenimport von oBDS-XML-Dateien mit automatischer Schema-Prüfung
+            und Fehlerprotokoll.
+          </p>
+        </div>
+
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="8" r="5" stroke="#005CA9" strokeWidth="1.5" fill="none" />
+              <path d="M8 5v3l2 2" stroke="#005CA9" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <p className={styles.featureTitle}>Qualitätsprüfung</p>
+          <p className={styles.featureDesc}>
+            Kleinere Schemabweichungen werden toleriert und als Warnungen protokolliert,
+            ohne den Import zu blockieren.
+          </p>
+        </div>
+
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="10" width="3" height="4" rx="1" fill="#005CA9" />
+              <rect x="6.5" y="7" width="3" height="7" rx="1" fill="#005CA9" opacity="0.7" />
+              <rect x="11" y="4" width="3" height="10" rx="1" fill="#005CA9" opacity="0.4" />
+            </svg>
+          </div>
+          <p className={styles.featureTitle}>R-Auswertung</p>
+          <p className={styles.featureDesc}>
+            Integrierte R-Umgebung mit vorbereiteten Analyseskripten, die direkt auf die
+            importierte Datenbank zugreifen.
+          </p>
+        </div>
+
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="3" width="14" height="10" rx="2" stroke="#005CA9" strokeWidth="1.5" fill="none" />
+              <path d="M5 8h6M5 10.5h4" stroke="#005CA9" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <p className={styles.featureTitle}>Kartendarstellung</p>
+          <p className={styles.featureDesc}>
+            Regionale Visualisierungen mit <code className={styles.codeInline}>karte_kreise.R</code> direkt
+            aus der Applikation heraus.
+          </p>
+        </div>
+      </div>
+
+      <p className={styles.sectionTitle}>Unterstützte Importformate</p>
+      <div className={styles.formats}>
+        <div className={styles.formatRow}>
+          <span className={styles.formatBadge}>oBDS 3.0.4_RKI</span>
+          <span className={styles.formatText}>
+            Onkologischer Basisdatensatz, RKI-Profil, Version 3.0.4 — aktuell empfohlenes Format
+          </span>
+        </div>
+        <div className={styles.formatRow}>
+          <span className={styles.formatBadge}>oBDS 3.0.0.8a_RKI</span>
+          <span className={styles.formatText}>
+            Onkologischer Basisdatensatz, RKI-Profil, Version 3.0.0.8a — wird weiterhin unterstützt
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.securityBox}>
+        <div className={styles.securityIcon}>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 2L3 5v4c0 3.31 2.56 6.41 6 7 3.44-.59 6-3.69 6-7V5L9 2z"
+              stroke="#005CA9"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M6.5 9l1.5 1.5 3-3"
+              stroke="#005CA9"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <p>
+          <strong>Datenschutz &amp; Betrieb:</strong> KIKA wird ausschließlich auf der internen
+          Infrastruktur des Hamburgischen Krebsregisters betrieben. Patientendaten verlassen zu
+          keinem Zeitpunkt die gesicherte Registerumgebung. Ein aktiver Internetzugang ist für
+          den regulären Betrieb nicht erforderlich.
+        </p>
+      </div>
+
+      <p className={styles.sectionTitle}>Entwicklung &amp; Kooperation</p>
+      <div className={styles.collabBox}>
+        <div className={styles.collabIcon}>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="9" cy="9" r="7" stroke="#005CA9" strokeWidth="1.5" fill="none" />
+            <path d="M6 9h6M9 6v6" stroke="#005CA9" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+        <p>
+          KIKA wurde in Kooperation mit der <strong>HAW Hamburg, Fachbereich Informatik</strong>,
+          unter der Leitung von <strong>Prof. Kai von Luck</strong> entwickelt.
+        </p>
+      </div>
+
+      <p className={styles.sectionTitle}>Ansprechpartner</p>
+      <div className={styles.contactGrid}>
+        <div className={styles.contactCard}>
+          <div className={styles.contactInner}>
+            <div className={styles.avatar}>AS</div>
+            <div>
+              <p className={styles.contactName}>Dr. Annemarie Schultz</p>
+              <p className={styles.contactRole}>
+                Hamburgisches Krebsregister · Analyse &amp; Methodik
+              </p>
+              <a href="mailto:annemarie.schultz@bwfg.hamburg.de" className={styles.contactEmail}>
+                annemarie.schultz@bwfg.hamburg.de
+              </a>
             </div>
-          ))}
+          </div>
         </div>
-        <p className="text-xs mt-2" style={{ color: "#909090" }}>
-          Dateien mit geringfügigen Schema-Abweichungen (z. B. unbekannte Code-Werte) werden
-          importiert und mit Warnungen versehen, damit die Datenqualität nachvollzogen werden kann.
-        </p>
-      </section>
 
-      {/* Kurzanleitung */}
-      <section>
-        <h2 className="text-base font-semibold mb-4" style={{ color: "#003063" }}>
-          Kurzanleitung
-        </h2>
-        <ol className="space-y-4">
-          {STEPS.map((s) => (
-            <li key={s.n} className="flex gap-4">
-              <span
-                className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                style={{ backgroundColor: "#003063" }}
-              >
-                {s.n}
-              </span>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: "#003063" }}>
-                  {s.title}
-                </p>
-                <p className="text-sm mt-0.5 leading-relaxed" style={{ color: "#505050" }}>
-                  {s.text}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Ansprechpartner */}
-      <section>
-        <h2 className="text-base font-semibold mb-3" style={{ color: "#003063" }}>
-          Ansprechpartner &amp; Support
-        </h2>
-        <div
-          className="rounded-lg px-4 py-3 text-sm space-y-1"
-          style={{ backgroundColor: "#F2F5F7" }}
-        >
-          <p style={{ color: "#303030" }}>
-            Bei technischen Fragen oder Problemen mit dem Import wenden Sie sich bitte an:
-          </p>
-          <p>
-            <a
-              href="mailto:annemarie.schultz@bwfg.hamburg.de"
-              className="font-medium underline"
-              style={{ color: "#003063" }}
-            >
-              annemarie.schultz@bwfg.hamburg.de
-            </a>
-          </p>
+        <div className={styles.contactCard}>
+          <div className={styles.contactInner}>
+            <div className={styles.avatar}>FP</div>
+            <div>
+              <p className={styles.contactName}>PD Dr. Frederik Peters</p>
+              <p className={styles.contactRole}>Hamburgisches Krebsregister</p>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      {/* Build-Version */}
-      <section className="border-t pt-6" style={{ borderColor: "#D8D8D8" }}>
-        <p className="text-xs" style={{ color: "#909090" }}>
-          Build-Version:{" "}
-          <span className="font-mono">{BUILD_VERSION}</span>
-        </p>
-      </section>
+      <div className={styles.footer}>
+        <span className={styles.footerLeft}>© 2025 Hamburgisches Krebsregister</span>
+        <span className={styles.footerBuild}>Build {BUILD_VERSION}</span>
+      </div>
     </div>
   );
 }
