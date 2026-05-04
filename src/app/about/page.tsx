@@ -106,9 +106,9 @@ export default function AboutPage() {
         </div>
         <p>
           <strong>Datenschutz &amp; Betrieb:</strong> KIKA wird ausschließlich auf der internen
-          Infrastruktur des Hamburgischen Krebsregisters betrieben. Patientendaten verlassen zu
-          keinem Zeitpunkt die gesicherte Registerumgebung. Ein aktiver Internetzugang ist für
-          den regulären Betrieb nicht erforderlich.
+          Infrastruktur des jeweiligen Landeskrebsregisters betrieben. Patientendaten verlassen
+          zu keinem Zeitpunkt die gesicherte Registerumgebung. Ein aktiver Internetzugang ist
+          für den regulären Betrieb nicht erforderlich.
         </p>
       </div>
 
