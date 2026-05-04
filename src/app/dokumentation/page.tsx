@@ -42,14 +42,11 @@ export default function DokumentationIndex() {
           <Link
             key={c.href}
             href={c.href}
-            className="block rounded-2xl p-6 no-underline border transition-shadow"
+            className="block rounded-2xl p-6 no-underline border transition-shadow shadow-sm hover:shadow-md"
             style={{
               backgroundColor: "#FFFFFF",
               borderColor:     "#D8D8D8",
-              boxShadow:       "0 1px 4px rgba(0,0,0,0.04)",
             }}
-            onMouseOver={e => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; }}
-            onMouseOut={e => { e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"; }}
           >
             <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>{c.icon}</div>
             <h2 className="text-lg font-semibold mb-2" style={{ color: "#003063" }}>{c.title}</h2>
