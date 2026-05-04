@@ -2,7 +2,7 @@ export default function RadiotherapySessionMetabolicDoc() {
   return (
     <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
       <h2 className="text-3xl font-bold mb-6">
-        🧪 Bestrahlungssitzung (Metabolisch)
+        🧪 Metabolische Bestrahlung — Sitzung <code className="font-mono text-xl text-gray-500 ml-2">(radiotherapy_session_metabolic)</code>
       </h2>
 
       <table className="min-w-full text-sm text-left border border-gray-300 rounded-lg overflow-hidden">

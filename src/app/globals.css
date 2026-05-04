@@ -49,3 +49,103 @@ body {
   color: #000000;
   font-family: "Lato", Arial, Helvetica, sans-serif;
 }
+
+/* Handbuch-Markdown-Rendering (HandbookView) */
+.handbook-prose {
+  color: #303030;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.handbook-prose h1 { display: none; }  /* Titel kommt aus dem HandbookView selbst */
+.handbook-prose h2 {
+  color: #003063;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #D8D8D8;
+  scroll-margin-top: 1rem;
+}
+.handbook-prose h3 {
+  color: #003063;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 1.75rem 0 0.5rem;
+  scroll-margin-top: 1rem;
+}
+.handbook-prose h4 {
+  color: #003063;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+.handbook-prose p {
+  margin: 0.75rem 0;
+}
+.handbook-prose strong { color: #003063; font-weight: 600; }
+.handbook-prose ul, .handbook-prose ol {
+  margin: 0.75rem 0 0.75rem 1.5rem;
+}
+.handbook-prose ul { list-style: disc; }
+.handbook-prose ol { list-style: decimal; }
+.handbook-prose li { margin: 0.25rem 0; }
+.handbook-prose code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: #EEF2F7;
+  color: #003063;
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+}
+.handbook-prose pre {
+  background: #1E2A3A;
+  color: #E8E8E8;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.handbook-prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+.handbook-prose blockquote {
+  border-left: 3px solid #0B70C8;
+  background: #EEF4FA;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  color: #303030;
+  font-size: 14px;
+}
+.handbook-prose blockquote p { margin: 0.25rem 0; }
+.handbook-prose table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 14px;
+  width: 100%;
+}
+.handbook-prose th, .handbook-prose td {
+  border: 1px solid #D8D8D8;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+.handbook-prose th {
+  background: #F2F5F7;
+  font-weight: 600;
+  color: #003063;
+}
+.handbook-prose a {
+  color: #0B70C8;
+  text-decoration: underline;
+}
+.handbook-prose a:hover { text-decoration: none; }
+.handbook-prose hr {
+  border: none;
+  border-top: 1px solid #D8D8D8;
+  margin: 2rem 0;
+}

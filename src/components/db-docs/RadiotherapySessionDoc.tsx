@@ -1,7 +1,16 @@
-export default function TumorRadiotherapyDoc() {
+export default function RadiotherapySessionDoc() {
   return (
     <section className="max-w-5xl w-full mx-auto p-6 bg-white rounded-3xl shadow-sm mb-12">
-      <h2 className="text-3xl font-bold mb-6">☢️ Strahlentherapie <code className="font-mono text-xl text-gray-500 ml-2">(tumor_radiotherapy)</code></h2>
+      <h2 className="text-3xl font-bold mb-6">
+        ☢️ Bestrahlungssitzung — Basis <code className="font-mono text-xl text-gray-500 ml-2">(radiotherapy_session)</code>
+      </h2>
+
+      <p className="text-sm mb-4" style={{ color: "#505050" }}>
+        Eltern-Tabelle der drei spezifischen Sitzungs-Tabellen
+        (perkutan, brachytherapeutisch, metabolisch). Jede Zeile entspricht
+        einer Bestrahlungssitzung; die spezifischen Tabellen referenzieren
+        diese über <code className="font-mono">radiotherapy_session_id</code>.
+      </p>
 
       <table className="min-w-full text-sm text-left border border-gray-300 rounded-lg overflow-hidden">
         <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
@@ -17,40 +26,49 @@ export default function TumorRadiotherapyDoc() {
             type="Integer (PK)"
             description="Internal ID / Interne ID"
           />
-
           <TableRow
-            field="tumor_report_id"
+            field="tumor_radiotherapy_id"
             type="Integer (FK)"
-            description="Reference to tumor report / Verweis auf Tumorbericht"
+            description="Reference to tumor_radiotherapy / Verweis auf Strahlentherapie"
           />
-
           <TableRow
-            field="intent"
+            field="start_date"
+            type="Date"
+            description="Start of session / Beginn der Sitzung"
+          />
+          <TableRow
+            field="start_date_accuracy"
             type="Enum"
-            description="Radiotherapy intent / Bestrahlungsintention"
+            description="Date accuracy / Datumsgenauigkeit"
             enumValues={[
-              ["K", "Curative / Kurativ"],
-              ["P", "Palliative"],
-              ["O", "Other / Sonstige"],
-              ["S", "Symptom control / Symptomatisch"],
-              ["X", "Unknown / Keine Angabe"],
+              ["E", "Exact / Exakt"],
+              ["T", "Day / Tag"],
+              ["M", "Month / Monat"],
+              ["V", "Estimate / Vollschätzung"],
             ]}
           />
-
           <TableRow
-            field="surgery_relation"
+            field="duration_days"
+            type="Integer"
+            description="Duration in days / Dauer in Tagen"
+          />
+          <TableRow
+            field="target_area"
             type="Enum"
-            description="Relation to surgery / Stellung zur OP"
+            description="Target region / Zielgebiet"
+          />
+          <TableRow
+            field="laterality"
+            type="Enum"
+            description="Side / Seite (Links / Rechts / Beidseits / Mittellinie)"
             enumValues={[
-              ["O", "Without surgery / Ohne OP"],
-              ["A", "Adjuvant"],
-              ["N", "Neoadjuvant"],
-              ["I", "Intercurrent / Interkurrent"],
-              ["Z", "Interval irradiation / Zwischen-/Intervallbestrahlung"],
-              ["S", "Other / Sonstiges"],
+              ["L", "Left / Links"],
+              ["R", "Right / Rechts"],
+              ["B", "Bilateral / Beidseits"],
+              ["M", "Midline / Mittellinie"],
+              ["U", "Unknown / Unbekannt"],
             ]}
           />
-
           <TableRow
             field="created_at"
             type="Timestamp"
