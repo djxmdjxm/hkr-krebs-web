@@ -13,7 +13,7 @@ export default function AboutPage() {
       <div className={styles.header}>
         <p className={styles.headerLabel}>Hamburgisches Krebsregister</p>
         <h1 className={styles.headerTitle}>KIKA</h1>
-        <p className={styles.headerSubtitle}>Krebsregister Import- und Karten-Applikation</p>
+        <p className={styles.headerSubtitle}>KI in der Krebsregister-Datenanalyse</p>
       </div>
 
       <div className={styles.lead}>
