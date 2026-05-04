@@ -256,12 +256,12 @@ export default function BulkUploadSection() {
   const pollStatus = useCallback((localId: string, uid: string): Promise<void> => {
     return new Promise((resolve) => {
       let attempts = 0;
-      const MAX = 150; // 150 x 2s = 300s Timeout
+      const MAX = 900; // 900 x 2s = 1800s (30 min) Timeout — deckt Massenupload bis ~30 Dateien ab, da Worker sequenziell arbeitet
       const interval = setInterval(async () => {
         attempts++;
         if (attempts > MAX) {
           clearInterval(interval);
-          updateFileItem(localId, { phase: "error", errorMsg: "Timeout: Import hat zu lange gedauert." });
+          updateFileItem(localId, { phase: "error", errorMsg: "Timeout: Import hat über 30 Minuten gedauert." });
           resolve();
           return;
         }

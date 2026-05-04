@@ -251,14 +251,14 @@ export default function UploadSection() {
   // Pollt GET /api/report/{uid} alle 2s bis status success oder failure.
   // Noetig weil POST /api/report nur die uid zurueckgibt -- der Import laeuft async.
   const pollImportStatus = (uid: string) => {
-    const maxAttempts = 150; // 150 x 2s = 300s Timeout
+    const maxAttempts = 900; // 900 x 2s = 1800s (30 min) Timeout — deckt Massenupload-Queue ab, da Worker sequenziell arbeitet
     let attempts = 0;
     const interval = setInterval(async () => {
       attempts++;
       if (attempts > maxAttempts) {
         clearInterval(interval);
         setUploadState("error");
-        setErrorMsg("Zeitueberschreitung: Der Import hat zu lange gedauert.");
+        setErrorMsg("Zeitueberschreitung: Der Import hat ueber 30 Minuten gedauert.");
         return;
       }
       try {
