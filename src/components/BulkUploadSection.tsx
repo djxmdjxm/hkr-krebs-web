@@ -143,8 +143,9 @@ function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed
     case "pending":      return 6;   // zarter Keimling als Platzhalter
     case "uploading":    return uploadProgress * 0.25;            // 0–25 mit Upload-Fortschritt
     case "validating": {
-      const t = Math.min(1, elapsed / 10000);                     // 25→70 über ~10s (Blütenblätter öffnen sich)
-      return 25 + t * 45;
+      const t1 = Math.min(1, elapsed / 15000);                         // 25→60 in 15 s (XSD-Validierung)
+      const t2 = Math.min(1, Math.max(0, elapsed - 15000) / 1785000); // 60→90 über ~30 min (DB-Import)
+      return 25 + t1 * 35 + t2 * 30;
     }
     case "importing": {
       const t = Math.min(1, elapsed / 1800000);                   // 70→99 über ~30min (gleichmäßig bis Abschluss)
