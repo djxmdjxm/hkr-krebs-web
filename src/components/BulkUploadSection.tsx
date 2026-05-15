@@ -44,6 +44,7 @@ type FileItem = {
   phase: FilePhase;
   phaseEnteredAt: number;
   variant: FlowerVariant;
+  importProgress?: number;   // echter Fortschritt 0–100 vom Server (Patienten importiert)
   summary?: ImportSummary;
   errorMsg?: string;
   errorCategory?: string;
@@ -138,18 +139,20 @@ function toFlowerPhase(p: FilePhase): FlowerPhase {
 
 // ---- Blumen-Fortschritt: Upload deterministisch, Validierung/Import zeitbasiert ----
 
-function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed: number): number {
+function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed: number, importProgress?: number): number {
   switch (phase) {
-    case "pending":      return 6;   // zarter Keimling als Platzhalter
+    case "pending":      return 6;
     case "uploading":    return uploadProgress * 0.10;            // 0–10 mit Upload-Fortschritt
     case "validating": {
-      const t1 = Math.min(1, elapsed / 20000);                         // 10→25 in 20 s (XSD-Validierung)
-      const t2 = Math.min(1, Math.max(0, elapsed - 20000) / 1780000); // 25→90 über ~30 min (DB-Import)
-      return 10 + t1 * 15 + t2 * 65;
+      const t = Math.min(1, elapsed / 20000);                     // 10→25 in 20 s (XSD-Validierung)
+      return 10 + t * 15;
     }
     case "importing": {
-      const t = Math.min(1, elapsed / 1800000);                   // 90→99 über ~30 min
-      return 90 + t * 9;
+      if (importProgress !== undefined) {
+        return 25 + importProgress * 0.70;                        // 25→95 mit echtem Server-Fortschritt
+      }
+      const t = Math.min(1, elapsed / 1800000);                   // Fallback zeitbasiert
+      return 25 + t * 65;
     }
     case "done":         return 100;
     case "error":        return 20;
@@ -174,7 +177,7 @@ function RoseItem({ item, roseSize }: RoseItemProps) {
   const roseEl = (
     <FlowerProgress
       variant={item.variant}
-      progress={computeFlowerProgress(item.phase, item.uploadProgress, elapsed)}
+      progress={computeFlowerProgress(item.phase, item.uploadProgress, elapsed, item.importProgress)}
       phase={toFlowerPhase(item.phase)}
       size={roseSize}
       showLabel={false}
@@ -272,21 +275,27 @@ export default function BulkUploadSection() {
           const data = await res.json();
           if (data.status === "success" || data.status === "success_with_warnings") {
             clearInterval(interval);
-            updateFileItem(localId, { phase: "importing" });
             const fileWarnings: ImportWarning[] =
               data.status === "success_with_warnings" ? (data.additional_info?.warnings ?? []) : [];
             fetch(`/api/report/${uid}/summary`)
               .then(r => r.ok ? r.json() : null)
               .then(summary => updateFileItem(localId, {
                 phase: "done",
+                importProgress: 100,
                 summary: summary ?? undefined,
                 warnings: fileWarnings.length > 0 ? fileWarnings : undefined,
               }))
               .catch(() => updateFileItem(localId, {
                 phase: "done",
+                importProgress: 100,
                 warnings: fileWarnings.length > 0 ? fileWarnings : undefined,
               }));
             resolve();
+          } else if (data.status === "pending" && data.additional_info?.progress_total > 0) {
+            const pct = Math.round(
+              (data.additional_info.progress_current / data.additional_info.progress_total) * 100
+            );
+            updateFileItem(localId, { phase: "importing", importProgress: pct });
           } else if (data.status === "failure") {
             clearInterval(interval);
             const info = data.additional_info ?? null;
