@@ -147,8 +147,8 @@ function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed
       return 25 + t * 45;
     }
     case "importing": {
-      const t = Math.min(1, elapsed / 240000);                    // 70→92 über ~4min (voll erblüht)
-      return 70 + t * 22;
+      const t = Math.min(1, elapsed / 1800000);                   // 70→99 über ~30min (gleichmäßig bis Abschluss)
+      return 70 + t * 29;
     }
     case "done":         return 100;
     case "error":        return 20;
