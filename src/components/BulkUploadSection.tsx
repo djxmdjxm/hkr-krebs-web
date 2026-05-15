@@ -126,7 +126,7 @@ function calcColumns(count: number): number {
 }
 
 // Cycling-Variante: Position 0=rose, 1=sunflower, 2=daisy, 3=tulip, 4=cherry
-const FLOWER_CYCLE: FlowerVariant[] = ["rose", "sunflower", "daisy", "tulip", "cherry"];
+const FLOWER_CYCLE: FlowerVariant[] = ["rose", "sunflower", "daisy", "tulip", "cherry", "poppy", "lavender", "cornflower", "cactus", "forgetmenot"];
 
 // ---- Phase → FlowerProgress phase mapping ----------------------------------
 
