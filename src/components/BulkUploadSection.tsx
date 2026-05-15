@@ -141,15 +141,15 @@ function toFlowerPhase(p: FilePhase): FlowerPhase {
 function computeFlowerProgress(phase: FilePhase, uploadProgress: number, elapsed: number): number {
   switch (phase) {
     case "pending":      return 6;   // zarter Keimling als Platzhalter
-    case "uploading":    return uploadProgress * 0.25;            // 0–25 mit Upload-Fortschritt
+    case "uploading":    return uploadProgress * 0.10;            // 0–10 mit Upload-Fortschritt
     case "validating": {
-      const t1 = Math.min(1, elapsed / 15000);                         // 25→60 in 15 s (XSD-Validierung)
-      const t2 = Math.min(1, Math.max(0, elapsed - 15000) / 1785000); // 60→90 über ~30 min (DB-Import)
-      return 25 + t1 * 35 + t2 * 30;
+      const t1 = Math.min(1, elapsed / 20000);                         // 10→25 in 20 s (XSD-Validierung)
+      const t2 = Math.min(1, Math.max(0, elapsed - 20000) / 1780000); // 25→90 über ~30 min (DB-Import)
+      return 10 + t1 * 15 + t2 * 65;
     }
     case "importing": {
-      const t = Math.min(1, elapsed / 1800000);                   // 70→99 über ~30min (gleichmäßig bis Abschluss)
-      return 70 + t * 29;
+      const t = Math.min(1, elapsed / 1800000);                   // 90→99 über ~30 min
+      return 90 + t * 9;
     }
     case "done":         return 100;
     case "error":        return 20;
